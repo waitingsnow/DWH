@@ -7,15 +7,91 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		992917A420E484E900233AC4 /* HWClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 992917A220E484E900233AC4 /* HWClient.h */; };
+		992917A520E484E900233AC4 /* HWClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 992917A320E484E900233AC4 /* HWClient.m */; };
+		992917A620E484E900233AC4 /* HWClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 992917A320E484E900233AC4 /* HWClient.m */; };
+		992917AE20E48D6900233AC4 /* DWHEventModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 992917AC20E48D6900233AC4 /* DWHEventModel.h */; };
+		992917AF20E48D6900233AC4 /* DWHEventModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 992917AD20E48D6900233AC4 /* DWHEventModel.m */; };
+		992917B020E48D6900233AC4 /* DWHEventModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 992917AD20E48D6900233AC4 /* DWHEventModel.m */; };
+		992917B320E4B89400233AC4 /* NSString+Extension.h in Headers */ = {isa = PBXBuildFile; fileRef = 992917B120E4B89400233AC4 /* NSString+Extension.h */; };
+		992917B420E4B89400233AC4 /* NSString+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 992917B220E4B89400233AC4 /* NSString+Extension.m */; };
+		992917B520E4B89400233AC4 /* NSString+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 992917B220E4B89400233AC4 /* NSString+Extension.m */; };
+		992917B820E4CEDF00233AC4 /* DWHUserPropertiesModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 992917B620E4CEDF00233AC4 /* DWHUserPropertiesModel.h */; };
+		992917B920E4CEDF00233AC4 /* DWHUserPropertiesModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 992917B720E4CEDF00233AC4 /* DWHUserPropertiesModel.m */; };
+		992917BA20E4CEDF00233AC4 /* DWHUserPropertiesModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 992917B720E4CEDF00233AC4 /* DWHUserPropertiesModel.m */; };
+		9956442E20E60DCD008ADE26 /* DWHSDKTool.h in Headers */ = {isa = PBXBuildFile; fileRef = 9956442C20E60DCD008ADE26 /* DWHSDKTool.h */; };
+		9956442F20E60DCD008ADE26 /* DWHSDKTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 9956442D20E60DCD008ADE26 /* DWHSDKTool.m */; };
+		9956443020E60DCD008ADE26 /* DWHSDKTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 9956442D20E60DCD008ADE26 /* DWHSDKTool.m */; };
+		9964D82220EA40A100BDD336 /* DWHEventId.h in Headers */ = {isa = PBXBuildFile; fileRef = 9964D82020EA40A100BDD336 /* DWHEventId.h */; };
+		9964D82320EA40A100BDD336 /* DWHEventId.m in Sources */ = {isa = PBXBuildFile; fileRef = 9964D82120EA40A100BDD336 /* DWHEventId.m */; };
+		9964D82420EA40A100BDD336 /* DWHEventId.m in Sources */ = {isa = PBXBuildFile; fileRef = 9964D82120EA40A100BDD336 /* DWHEventId.m */; };
 		99A8477F20E3B07600D430BF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 99A8477E20E3B07600D430BF /* AppDelegate.m */; };
 		99A8478220E3B07600D430BF /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 99A8478120E3B07600D430BF /* ViewController.m */; };
 		99A8478520E3B07600D430BF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 99A8478320E3B07600D430BF /* Main.storyboard */; };
 		99A8478720E3B07600D430BF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 99A8478620E3B07600D430BF /* Assets.xcassets */; };
 		99A8478A20E3B07600D430BF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 99A8478820E3B07600D430BF /* LaunchScreen.storyboard */; };
 		99A8478D20E3B07700D430BF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 99A8478C20E3B07700D430BF /* main.m */; };
+		99A8479C20E3B09400D430BF /* DWH.h in Headers */ = {isa = PBXBuildFile; fileRef = 99A8479A20E3B09400D430BF /* DWH.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		99A8479F20E3B09400D430BF /* DWH.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99A8479820E3B09400D430BF /* DWH.framework */; };
+		99A847A020E3B09400D430BF /* DWH.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 99A8479820E3B09400D430BF /* DWH.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		99A847B120E3B28600D430BF /* DWHORM.m in Sources */ = {isa = PBXBuildFile; fileRef = 99A847AB20E3B28500D430BF /* DWHORM.m */; };
+		99A847B220E3B28600D430BF /* DWHORM.m in Sources */ = {isa = PBXBuildFile; fileRef = 99A847AB20E3B28500D430BF /* DWHORM.m */; };
+		99A847B320E3B28600D430BF /* DWHNSObject+ORM.m in Sources */ = {isa = PBXBuildFile; fileRef = 99A847AC20E3B28500D430BF /* DWHNSObject+ORM.m */; };
+		99A847B420E3B28600D430BF /* DWHNSObject+ORM.m in Sources */ = {isa = PBXBuildFile; fileRef = 99A847AC20E3B28500D430BF /* DWHNSObject+ORM.m */; };
+		99A847B520E3B28600D430BF /* DWHORMDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 99A847AD20E3B28500D430BF /* DWHORMDB.m */; };
+		99A847B620E3B28600D430BF /* DWHORMDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 99A847AD20E3B28500D430BF /* DWHORMDB.m */; };
+		99A847F120E3B80E00D430BF /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 99A847EF20E3B80400D430BF /* libsqlite3.tbd */; };
+		99A847F520E3BF9C00D430BF /* DWHSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = 99A847F320E3BF9C00D430BF /* DWHSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		99A847F620E3BF9C00D430BF /* DWHSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = 99A847F420E3BF9C00D430BF /* DWHSDK.m */; };
+		99A847F720E3BF9C00D430BF /* DWHSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = 99A847F420E3BF9C00D430BF /* DWHSDK.m */; };
+		99DF8A4420E5D71F007F78C5 /* NSDictionary+Extension.h in Headers */ = {isa = PBXBuildFile; fileRef = 99DF8A4220E5D71F007F78C5 /* NSDictionary+Extension.h */; };
+		99DF8A4520E5D71F007F78C5 /* NSDictionary+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 99DF8A4320E5D71F007F78C5 /* NSDictionary+Extension.m */; };
+		99DF8A4620E5D71F007F78C5 /* NSDictionary+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 99DF8A4320E5D71F007F78C5 /* NSDictionary+Extension.m */; };
+		D46B3ED503FF46EC61F2A63B /* Pods_DWHCommon_DWH.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 606F6D70B0FF575C20530D14 /* Pods_DWHCommon_DWH.framework */; };
+		E9A05BE357AECAB6C21186C7 /* Pods_DWHCommon_DWHSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A64283F79D51E6E45E1D234 /* Pods_DWHCommon_DWHSDK.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		99A8479D20E3B09400D430BF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 99A8477220E3B07600D430BF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 99A8479720E3B09400D430BF;
+			remoteInfo = DWH;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		99A847A420E3B09400D430BF /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				99A847A020E3B09400D430BF /* DWH.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		05F0E6379D60055A5D1D88E5 /* Pods-DWHCommon-DWH.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DWHCommon-DWH.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DWHCommon-DWH/Pods-DWHCommon-DWH.debug.xcconfig"; sourceTree = "<group>"; };
+		4FAA9797D3972B0D61EC0BE7 /* Pods-DWHCommon-DWHSDK.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DWHCommon-DWHSDK.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DWHCommon-DWHSDK/Pods-DWHCommon-DWHSDK.debug.xcconfig"; sourceTree = "<group>"; };
+		5A64283F79D51E6E45E1D234 /* Pods_DWHCommon_DWHSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DWHCommon_DWHSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		606F6D70B0FF575C20530D14 /* Pods_DWHCommon_DWH.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_DWHCommon_DWH.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		992917A220E484E900233AC4 /* HWClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HWClient.h; sourceTree = "<group>"; };
+		992917A320E484E900233AC4 /* HWClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HWClient.m; sourceTree = "<group>"; };
+		992917AC20E48D6900233AC4 /* DWHEventModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWHEventModel.h; sourceTree = "<group>"; };
+		992917AD20E48D6900233AC4 /* DWHEventModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWHEventModel.m; sourceTree = "<group>"; };
+		992917B120E4B89400233AC4 /* NSString+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+Extension.h"; sourceTree = "<group>"; };
+		992917B220E4B89400233AC4 /* NSString+Extension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+Extension.m"; sourceTree = "<group>"; };
+		992917B620E4CEDF00233AC4 /* DWHUserPropertiesModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWHUserPropertiesModel.h; sourceTree = "<group>"; };
+		992917B720E4CEDF00233AC4 /* DWHUserPropertiesModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWHUserPropertiesModel.m; sourceTree = "<group>"; };
+		9956442C20E60DCD008ADE26 /* DWHSDKTool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWHSDKTool.h; sourceTree = "<group>"; };
+		9956442D20E60DCD008ADE26 /* DWHSDKTool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWHSDKTool.m; sourceTree = "<group>"; };
+		9964D82020EA40A100BDD336 /* DWHEventId.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWHEventId.h; sourceTree = "<group>"; };
+		9964D82120EA40A100BDD336 /* DWHEventId.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWHEventId.m; sourceTree = "<group>"; };
 		99A8477A20E3B07600D430BF /* DWHSDK.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DWHSDK.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		99A8477D20E3B07600D430BF /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		99A8477E20E3B07600D430BF /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -26,6 +102,23 @@
 		99A8478920E3B07600D430BF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		99A8478B20E3B07700D430BF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		99A8478C20E3B07700D430BF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		99A8479820E3B09400D430BF /* DWH.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DWH.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		99A8479A20E3B09400D430BF /* DWH.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWH.h; sourceTree = "<group>"; };
+		99A8479B20E3B09400D430BF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		99A847AB20E3B28500D430BF /* DWHORM.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DWHORM.m; sourceTree = "<group>"; };
+		99A847AC20E3B28500D430BF /* DWHNSObject+ORM.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "DWHNSObject+ORM.m"; sourceTree = "<group>"; };
+		99A847AD20E3B28500D430BF /* DWHORMDB.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DWHORMDB.m; sourceTree = "<group>"; };
+		99A847AE20E3B28500D430BF /* DWHORM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DWHORM.h; sourceTree = "<group>"; };
+		99A847AF20E3B28500D430BF /* DWHORMDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DWHORMDB.h; sourceTree = "<group>"; };
+		99A847B020E3B28500D430BF /* DWHNSObject+ORM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DWHNSObject+ORM.h"; sourceTree = "<group>"; };
+		99A847EF20E3B80400D430BF /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		99A847F320E3BF9C00D430BF /* DWHSDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWHSDK.h; sourceTree = "<group>"; };
+		99A847F420E3BF9C00D430BF /* DWHSDK.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWHSDK.m; sourceTree = "<group>"; };
+		99A847F820E3C17800D430BF /* libsqlite3.0.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.0.tbd; path = usr/lib/libsqlite3.0.tbd; sourceTree = SDKROOT; };
+		99DF8A4220E5D71F007F78C5 /* NSDictionary+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+Extension.h"; sourceTree = "<group>"; };
+		99DF8A4320E5D71F007F78C5 /* NSDictionary+Extension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+Extension.m"; sourceTree = "<group>"; };
+		BCDB713A89F02C48BC7CA783 /* Pods-DWHCommon-DWH.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DWHCommon-DWH.release.xcconfig"; path = "Pods/Target Support Files/Pods-DWHCommon-DWH/Pods-DWHCommon-DWH.release.xcconfig"; sourceTree = "<group>"; };
+		FF224689E6D1042CFC2305C7 /* Pods-DWHCommon-DWHSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DWHCommon-DWHSDK.release.xcconfig"; path = "Pods/Target Support Files/Pods-DWHCommon-DWHSDK/Pods-DWHCommon-DWHSDK.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,17 +126,70 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				99A847F120E3B80E00D430BF /* libsqlite3.tbd in Frameworks */,
+				99A8479F20E3B09400D430BF /* DWH.framework in Frameworks */,
+				E9A05BE357AECAB6C21186C7 /* Pods_DWHCommon_DWHSDK.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		99A8479420E3B09400D430BF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D46B3ED503FF46EC61F2A63B /* Pods_DWHCommon_DWH.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9663BD52123C2DF773E5FF72 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				05F0E6379D60055A5D1D88E5 /* Pods-DWHCommon-DWH.debug.xcconfig */,
+				BCDB713A89F02C48BC7CA783 /* Pods-DWHCommon-DWH.release.xcconfig */,
+				4FAA9797D3972B0D61EC0BE7 /* Pods-DWHCommon-DWHSDK.debug.xcconfig */,
+				FF224689E6D1042CFC2305C7 /* Pods-DWHCommon-DWHSDK.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		9929179F20E484B100233AC4 /* model */ = {
+			isa = PBXGroup;
+			children = (
+				992917AC20E48D6900233AC4 /* DWHEventModel.h */,
+				992917AD20E48D6900233AC4 /* DWHEventModel.m */,
+				992917B620E4CEDF00233AC4 /* DWHUserPropertiesModel.h */,
+				992917B720E4CEDF00233AC4 /* DWHUserPropertiesModel.m */,
+				9964D82020EA40A100BDD336 /* DWHEventId.h */,
+				9964D82120EA40A100BDD336 /* DWHEventId.m */,
+			);
+			path = model;
+			sourceTree = "<group>";
+		};
+		992917A020E484B100233AC4 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				992917A220E484E900233AC4 /* HWClient.h */,
+				992917A320E484E900233AC4 /* HWClient.m */,
+				992917B120E4B89400233AC4 /* NSString+Extension.h */,
+				992917B220E4B89400233AC4 /* NSString+Extension.m */,
+				99DF8A4220E5D71F007F78C5 /* NSDictionary+Extension.h */,
+				99DF8A4320E5D71F007F78C5 /* NSDictionary+Extension.m */,
+				9956442C20E60DCD008ADE26 /* DWHSDKTool.h */,
+				9956442D20E60DCD008ADE26 /* DWHSDKTool.m */,
+			);
+			path = Tools;
+			sourceTree = "<group>";
+		};
 		99A8477120E3B07600D430BF = {
 			isa = PBXGroup;
 			children = (
 				99A8477C20E3B07600D430BF /* DWHSDK */,
+				99A8479920E3B09400D430BF /* DWH */,
 				99A8477B20E3B07600D430BF /* Products */,
+				9663BD52123C2DF773E5FF72 /* Pods */,
+				D1C3DC22E7869E848C9E342B /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -51,6 +197,7 @@
 			isa = PBXGroup;
 			children = (
 				99A8477A20E3B07600D430BF /* DWHSDK.app */,
+				99A8479820E3B09400D430BF /* DWH.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -58,6 +205,10 @@
 		99A8477C20E3B07600D430BF /* DWHSDK */ = {
 			isa = PBXGroup;
 			children = (
+				9929179F20E484B100233AC4 /* model */,
+				992917A020E484B100233AC4 /* Tools */,
+				99A847F220E3BF3900D430BF /* SDK */,
+				99A847AA20E3B28500D430BF /* orm */,
 				99A8477D20E3B07600D430BF /* AppDelegate.h */,
 				99A8477E20E3B07600D430BF /* AppDelegate.m */,
 				99A8478020E3B07600D430BF /* ViewController.h */,
@@ -71,25 +222,108 @@
 			path = DWHSDK;
 			sourceTree = "<group>";
 		};
+		99A8479920E3B09400D430BF /* DWH */ = {
+			isa = PBXGroup;
+			children = (
+				99A8479A20E3B09400D430BF /* DWH.h */,
+				99A8479B20E3B09400D430BF /* Info.plist */,
+			);
+			path = DWH;
+			sourceTree = "<group>";
+		};
+		99A847AA20E3B28500D430BF /* orm */ = {
+			isa = PBXGroup;
+			children = (
+				99A847AE20E3B28500D430BF /* DWHORM.h */,
+				99A847AB20E3B28500D430BF /* DWHORM.m */,
+				99A847AD20E3B28500D430BF /* DWHORMDB.m */,
+				99A847AF20E3B28500D430BF /* DWHORMDB.h */,
+				99A847B020E3B28500D430BF /* DWHNSObject+ORM.h */,
+				99A847AC20E3B28500D430BF /* DWHNSObject+ORM.m */,
+			);
+			path = orm;
+			sourceTree = "<group>";
+		};
+		99A847F220E3BF3900D430BF /* SDK */ = {
+			isa = PBXGroup;
+			children = (
+				99A847F320E3BF9C00D430BF /* DWHSDK.h */,
+				99A847F420E3BF9C00D430BF /* DWHSDK.m */,
+			);
+			path = SDK;
+			sourceTree = "<group>";
+		};
+		D1C3DC22E7869E848C9E342B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				99A847F820E3C17800D430BF /* libsqlite3.0.tbd */,
+				99A847EF20E3B80400D430BF /* libsqlite3.tbd */,
+				606F6D70B0FF575C20530D14 /* Pods_DWHCommon_DWH.framework */,
+				5A64283F79D51E6E45E1D234 /* Pods_DWHCommon_DWHSDK.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		99A8479520E3B09400D430BF /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				992917B320E4B89400233AC4 /* NSString+Extension.h in Headers */,
+				9964D82220EA40A100BDD336 /* DWHEventId.h in Headers */,
+				992917B820E4CEDF00233AC4 /* DWHUserPropertiesModel.h in Headers */,
+				99DF8A4420E5D71F007F78C5 /* NSDictionary+Extension.h in Headers */,
+				992917A420E484E900233AC4 /* HWClient.h in Headers */,
+				992917AE20E48D6900233AC4 /* DWHEventModel.h in Headers */,
+				99A847F520E3BF9C00D430BF /* DWHSDK.h in Headers */,
+				99A8479C20E3B09400D430BF /* DWH.h in Headers */,
+				9956442E20E60DCD008ADE26 /* DWHSDKTool.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		99A8477920E3B07600D430BF /* DWHSDK */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 99A8479020E3B07700D430BF /* Build configuration list for PBXNativeTarget "DWHSDK" */;
 			buildPhases = (
+				C093001D7A4571E4DD329426 /* [CP] Check Pods Manifest.lock */,
 				99A8477620E3B07600D430BF /* Sources */,
 				99A8477720E3B07600D430BF /* Frameworks */,
 				99A8477820E3B07600D430BF /* Resources */,
+				99A847A420E3B09400D430BF /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				99A8479E20E3B09400D430BF /* PBXTargetDependency */,
 			);
 			name = DWHSDK;
 			productName = DWHSDK;
 			productReference = 99A8477A20E3B07600D430BF /* DWHSDK.app */;
 			productType = "com.apple.product-type.application";
+		};
+		99A8479720E3B09400D430BF /* DWH */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 99A847A120E3B09400D430BF /* Build configuration list for PBXNativeTarget "DWH" */;
+			buildPhases = (
+				7649A900B37D0927BF5BFF1C /* [CP] Check Pods Manifest.lock */,
+				99A8479320E3B09400D430BF /* Sources */,
+				99A8479420E3B09400D430BF /* Frameworks */,
+				99A8479520E3B09400D430BF /* Headers */,
+				99A8479620E3B09400D430BF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DWH;
+			productName = DWH;
+			productReference = 99A8479820E3B09400D430BF /* DWH.framework */;
+			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
 
@@ -101,6 +335,9 @@
 				ORGANIZATIONNAME = "mao PengLin";
 				TargetAttributes = {
 					99A8477920E3B07600D430BF = {
+						CreatedOnToolsVersion = 9.3;
+					};
+					99A8479720E3B09400D430BF = {
 						CreatedOnToolsVersion = 9.3;
 					};
 				};
@@ -119,6 +356,7 @@
 			projectRoot = "";
 			targets = (
 				99A8477920E3B07600D430BF /* DWHSDK */,
+				99A8479720E3B09400D430BF /* DWH */,
 			);
 		};
 /* End PBXProject section */
@@ -134,20 +372,103 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		99A8479620E3B09400D430BF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		7649A900B37D0927BF5BFF1C /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-DWHCommon-DWH-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C093001D7A4571E4DD329426 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-DWHCommon-DWHSDK-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		99A8477620E3B07600D430BF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				992917AF20E48D6900233AC4 /* DWHEventModel.m in Sources */,
+				99A847F620E3BF9C00D430BF /* DWHSDK.m in Sources */,
+				99DF8A4520E5D71F007F78C5 /* NSDictionary+Extension.m in Sources */,
+				992917A520E484E900233AC4 /* HWClient.m in Sources */,
 				99A8478220E3B07600D430BF /* ViewController.m in Sources */,
+				992917B420E4B89400233AC4 /* NSString+Extension.m in Sources */,
+				99A847B320E3B28600D430BF /* DWHNSObject+ORM.m in Sources */,
+				9956442F20E60DCD008ADE26 /* DWHSDKTool.m in Sources */,
+				992917B920E4CEDF00233AC4 /* DWHUserPropertiesModel.m in Sources */,
+				99A847B120E3B28600D430BF /* DWHORM.m in Sources */,
+				99A847B520E3B28600D430BF /* DWHORMDB.m in Sources */,
+				9964D82320EA40A100BDD336 /* DWHEventId.m in Sources */,
 				99A8478D20E3B07700D430BF /* main.m in Sources */,
 				99A8477F20E3B07600D430BF /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		99A8479320E3B09400D430BF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				99A847B220E3B28600D430BF /* DWHORM.m in Sources */,
+				992917A620E484E900233AC4 /* HWClient.m in Sources */,
+				99DF8A4620E5D71F007F78C5 /* NSDictionary+Extension.m in Sources */,
+				99A847B620E3B28600D430BF /* DWHORMDB.m in Sources */,
+				992917BA20E4CEDF00233AC4 /* DWHUserPropertiesModel.m in Sources */,
+				9964D82420EA40A100BDD336 /* DWHEventId.m in Sources */,
+				99A847B420E3B28600D430BF /* DWHNSObject+ORM.m in Sources */,
+				992917B020E48D6900233AC4 /* DWHEventModel.m in Sources */,
+				99A847F720E3BF9C00D430BF /* DWHSDK.m in Sources */,
+				9956443020E60DCD008ADE26 /* DWHSDKTool.m in Sources */,
+				992917B520E4B89400233AC4 /* NSString+Extension.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		99A8479E20E3B09400D430BF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 99A8479720E3B09400D430BF /* DWH */;
+			targetProxy = 99A8479D20E3B09400D430BF /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		99A8478320E3B07600D430BF /* Main.storyboard */ = {
@@ -281,10 +602,13 @@
 		};
 		99A8479120E3B07700D430BF /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4FAA9797D3972B0D61EC0BE7 /* Pods-DWHCommon-DWHSDK.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = Q3VZHMHCPE;
 				INFOPLIST_FILE = DWHSDK/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -297,10 +621,13 @@
 		};
 		99A8479220E3B07700D430BF /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FF224689E6D1042CFC2305C7 /* Pods-DWHCommon-DWHSDK.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = Q3VZHMHCPE;
 				INFOPLIST_FILE = DWHSDK/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -308,6 +635,64 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWHSDK;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		99A847A220E3B09400D430BF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05F0E6379D60055A5D1D88E5 /* Pods-DWHCommon-DWH.debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = DWH/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWH;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		99A847A320E3B09400D430BF /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = BCDB713A89F02C48BC7CA783 /* Pods-DWHCommon-DWH.release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = DWH/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACH_O_TYPE = staticlib;
+				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWH;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
 		};
@@ -328,6 +713,15 @@
 			buildConfigurations = (
 				99A8479120E3B07700D430BF /* Debug */,
 				99A8479220E3B07700D430BF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		99A847A120E3B09400D430BF /* Build configuration list for PBXNativeTarget "DWH" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				99A847A220E3B09400D430BF /* Debug */,
+				99A847A320E3B09400D430BF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

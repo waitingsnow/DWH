@@ -7,7 +7,8 @@
 //
 
 #import "AppDelegate.h"
-
+#import "DWHSDK.h"
+#import "NSDictionary+Extension.h"
 @interface AppDelegate ()
 
 @end
@@ -17,6 +18,40 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    NSLog(@"att json:%@",[@{} toJSonString]);
+    NSMutableDictionary *dic = [NSMutableDictionary new];
+    [dic setValue:[NSNull null] forKey:[NSNull null]];
+    NSLog(@"dic:%@",dic);
+    [[DWHSDK dwhSDK] initializeProjectId:1 isProductionEnv:false];
+    [[DWHSDK dwhSDK] setUserId:5702364 withProperties:@{@"gender":@"M",@"nation":@"Germany",@"timezone":@2}];
+//    [[DWHSDK dwhSDK] updateCommonEventProperties:@[@"gender",@"nation"]];
+    [[DWHSDK dwhSDK] updateUserProperties:@{@"c":@1,@"e":@(1.89765)}];
+//    dispatch_queue_t t =  dispatch_queue_create("hw_queue_event_handle", DISPATCH_QUEUE_CONCURRENT);
+//    dispatch_async(t, ^{
+        [[DWHSDK dwhSDK] logEvent:@"aaaa" withEventProperties:@{@"aaa":@"bbb"}];
+//    });
+//    dispatch_async(t, ^{
+//       [[DWHSDK dwhSDK] updateUserProperties:@{@"c":@1,@"e":@(1.89765)}];
+//    });
+//    dispatch_async(t, ^{
+        [[DWHSDK dwhSDK] logEvent:@"bbbbb" withEventProperties:@{@"ccccc":@"bbb"}];
+//    });
+//    dispatch_async(t, ^{
+//        [[DWHSDK dwhSDK] updateUserProperties:@{@"c":@1,@"e":@(1.89765)}];
+//    });
+//    dispatch_async(t, ^{
+        [[DWHSDK dwhSDK] logEvent:@"ddddddd" withEventProperties:@{@"eeeeee":@"bbb"}];
+//    });
+//    dispatch_async(t, ^{
+//        [[DWHSDK dwhSDK] updateUserProperties:@{@"c":@1,@"e":@(1.89765)}];
+//    });
+//    
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        for (int i=0; i<100; i++) {
+//            [[DWHSDK dwhSDK] updateUserProperties:@{@"f":@1,@"s":@(1),@"i":@(i)}];
+//        }
+//    });
+    
     return YES;
 }
 

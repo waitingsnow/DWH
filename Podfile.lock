@@ -1,3 +1,20 @@
-PODFILE CHECKSUM: 6d91a03193019e62fb0541324bf8c3b2e9d9095e
+PODS:
+  - CocoaSecurity (1.2.4)
+  - UICKeyChainStore (2.1.2)
 
-COCOAPODS: 1.5.0
+DEPENDENCIES:
+  - CocoaSecurity
+  - UICKeyChainStore
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - CocoaSecurity
+    - UICKeyChainStore
+
+SPEC CHECKSUMS:
+  CocoaSecurity: d288a6f87e0f363823d2cb83e753814a6944f71a
+  UICKeyChainStore: 85db518bb1d294366d15ec9b92a416c4e670518f
+
+PODFILE CHECKSUM: 71c1bb1047b191db24f77d0096cebadfdff1fd04
+
+COCOAPODS: 1.5.3

@@ -16,7 +16,9 @@
 #import "NSDictionary+Extension.h"
 #import "DWHSDKTool.h"
 #import "DWHEventId.h"
-
+#import <AdSupport/AdSupport.h>
+#import <UICKeyChainStore/UICKeyChainStore.h>
+#import <CocoaSecurity/CocoaSecurity.h>
 typedef void (^UploadCompleteBlock)(BOOL success);
 static NSInteger minDelayUploadEvent  = 1;
 static NSInteger maxDelayUploadEvent  = 5;
@@ -457,7 +459,31 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 + (NSString *)sdkVersion{
     return @"0.68";
 }
-
++ (NSString *)keychain_id{
+    NSString *key = [[UICKeyChainStore keyChainStore] stringForKey:@"DWAPPUID"];
+    if (key) {
+        return key;
+    }
+    BOOL on = [[ASIdentifierManager sharedManager] isAdvertisingTrackingEnabled];
+    NSString *uuidString = @"";
+    if (on) {
+        uuidString = [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
+    }
+    if (uuidString.length < 100) {
+        CFUUIDRef uuid;
+        CFStringRef uuidStr;
+        uuid = CFUUIDCreate(NULL);
+        uuidStr = CFUUIDCreateString(NULL, uuid);
+        uuidString =[NSString stringWithFormat:@"%@-%lld",uuidStr,(long long)[[NSDate date] timeIntervalSince1970]];
+        CFRelease(uuidStr);
+        CFRelease(uuid);
+    }
+    if (uuidString.length) {
+        NSString *md5 = [CocoaSecurity md5:uuidString].hex;
+        [[UICKeyChainStore keyChainStore] setString:md5 forKey:@"DWAPPUID"];
+    }
+    return uuidString;
+}
 + (NSString *)clientVersion{
     NSString *version = [[NSBundle mainBundle].infoDictionary objectForKey:@"CFBundleShortVersionString"];
     if (version) {

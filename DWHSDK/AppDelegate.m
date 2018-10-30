@@ -18,6 +18,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    NSLog(@"uid:%@",[DWHSDK keychain_id]);
+    
+    return TRUE;
     NSLog(@"att json:%@",[@{} toJSonString]);
     NSMutableDictionary *dic = [NSMutableDictionary new];
     [dic setValue:[NSNull null] forKey:[NSNull null]];

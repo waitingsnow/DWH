@@ -41,4 +41,8 @@
 - (void)logEvent:(NSString *)eventName;
 - (void)logEvent:(NSString *)eventName  withEventProperties:(NSDictionary * _Nullable)attributes;
 
+/**
+ 获取唯一不变的id
+ **/
++ (NSString *)keychain_id;
 @end

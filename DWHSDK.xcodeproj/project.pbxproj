@@ -47,6 +47,7 @@
 		99DF8A4420E5D71F007F78C5 /* NSDictionary+Extension.h in Headers */ = {isa = PBXBuildFile; fileRef = 99DF8A4220E5D71F007F78C5 /* NSDictionary+Extension.h */; };
 		99DF8A4520E5D71F007F78C5 /* NSDictionary+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 99DF8A4320E5D71F007F78C5 /* NSDictionary+Extension.m */; };
 		99DF8A4620E5D71F007F78C5 /* NSDictionary+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 99DF8A4320E5D71F007F78C5 /* NSDictionary+Extension.m */; };
+		99FC4DE22188510E007F32CE /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99FC4DE12188510E007F32CE /* AdSupport.framework */; };
 		D46B3ED503FF46EC61F2A63B /* Pods_DWHCommon_DWH.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 606F6D70B0FF575C20530D14 /* Pods_DWHCommon_DWH.framework */; };
 		E9A05BE357AECAB6C21186C7 /* Pods_DWHCommon_DWHSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A64283F79D51E6E45E1D234 /* Pods_DWHCommon_DWHSDK.framework */; };
 /* End PBXBuildFile section */
@@ -117,6 +118,7 @@
 		99A847F820E3C17800D430BF /* libsqlite3.0.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.0.tbd; path = usr/lib/libsqlite3.0.tbd; sourceTree = SDKROOT; };
 		99DF8A4220E5D71F007F78C5 /* NSDictionary+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+Extension.h"; sourceTree = "<group>"; };
 		99DF8A4320E5D71F007F78C5 /* NSDictionary+Extension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+Extension.m"; sourceTree = "<group>"; };
+		99FC4DE12188510E007F32CE /* AdSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdSupport.framework; path = System/Library/Frameworks/AdSupport.framework; sourceTree = SDKROOT; };
 		BCDB713A89F02C48BC7CA783 /* Pods-DWHCommon-DWH.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DWHCommon-DWH.release.xcconfig"; path = "Pods/Target Support Files/Pods-DWHCommon-DWH/Pods-DWHCommon-DWH.release.xcconfig"; sourceTree = "<group>"; };
 		FF224689E6D1042CFC2305C7 /* Pods-DWHCommon-DWHSDK.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DWHCommon-DWHSDK.release.xcconfig"; path = "Pods/Target Support Files/Pods-DWHCommon-DWHSDK/Pods-DWHCommon-DWHSDK.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -126,6 +128,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				99FC4DE22188510E007F32CE /* AdSupport.framework in Frameworks */,
 				99A847F120E3B80E00D430BF /* libsqlite3.tbd in Frameworks */,
 				99A8479F20E3B09400D430BF /* DWH.framework in Frameworks */,
 				E9A05BE357AECAB6C21186C7 /* Pods_DWHCommon_DWHSDK.framework in Frameworks */,
@@ -256,6 +259,7 @@
 		D1C3DC22E7869E848C9E342B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				99FC4DE12188510E007F32CE /* AdSupport.framework */,
 				99A847F820E3C17800D430BF /* libsqlite3.0.tbd */,
 				99A847EF20E3B80400D430BF /* libsqlite3.tbd */,
 				606F6D70B0FF575C20530D14 /* Pods_DWHCommon_DWH.framework */,
@@ -295,6 +299,7 @@
 				99A8477720E3B07600D430BF /* Frameworks */,
 				99A8477820E3B07600D430BF /* Resources */,
 				99A847A420E3B09400D430BF /* Embed Frameworks */,
+				7ACD09A575ACB32A13A10049 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -398,6 +403,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7ACD09A575ACB32A13A10049 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-DWHCommon-DWHSDK/Pods-DWHCommon-DWHSDK-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/CocoaSecurity/CocoaSecurity.framework",
+				"${BUILT_PRODUCTS_DIR}/UICKeyChainStore/UICKeyChainStore.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CocoaSecurity.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/UICKeyChainStore.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DWHCommon-DWHSDK/Pods-DWHCommon-DWHSDK-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		C093001D7A4571E4DD329426 /* [CP] Check Pods Manifest.lock */ = {
@@ -609,10 +634,7 @@
 				DEVELOPMENT_TEAM = Q3VZHMHCPE;
 				INFOPLIST_FILE = DWHSDK/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWHSDK;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -628,10 +650,7 @@
 				DEVELOPMENT_TEAM = Q3VZHMHCPE;
 				INFOPLIST_FILE = DWHSDK/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWHSDK;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -652,11 +671,7 @@
 				INFOPLIST_FILE = DWH/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACH_O_TYPE = staticlib;
 				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWH;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -681,11 +696,7 @@
 				INFOPLIST_FILE = DWH/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACH_O_TYPE = staticlib;
 				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWH;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";

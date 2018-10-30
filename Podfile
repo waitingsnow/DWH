@@ -4,7 +4,8 @@ inhibit_all_warnings!
 use_frameworks!
 
 abstract_target 'DWHCommon' do
-	
+	pod 'UICKeyChainStore'
+    pod 'CocoaSecurity'
 	target 'DWHSDK' do
 	end
 

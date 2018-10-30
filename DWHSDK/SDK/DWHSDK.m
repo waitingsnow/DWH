@@ -457,7 +457,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     return resuslt;
 }
 + (NSString *)sdkVersion{
-    return @"0.68";
+    return @"0.69";
 }
 + (NSString *)keychain_id{
     NSString *key = [[UICKeyChainStore keyChainStore] stringForKey:@"DWAPPUID"];
@@ -478,11 +478,11 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         CFRelease(uuidStr);
         CFRelease(uuid);
     }
-    if (uuidString.length) {
-        NSString *md5 = [CocoaSecurity md5:uuidString].hex;
+    NSString *md5 = [CocoaSecurity md5:uuidString].hex;
+    if (md5.length) {
         [[UICKeyChainStore keyChainStore] setString:md5 forKey:@"DWAPPUID"];
     }
-    return uuidString;
+    return md5;
 }
 + (NSString *)clientVersion{
     NSString *version = [[NSBundle mainBundle].infoDictionary objectForKey:@"CFBundleShortVersionString"];

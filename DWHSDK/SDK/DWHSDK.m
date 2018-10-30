@@ -469,7 +469,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     if (on) {
         uuidString = [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     }
-    if (uuidString.length < 100) {
+    if (uuidString.length < 10) {
         CFUUIDRef uuid;
         CFStringRef uuidStr;
         uuid = CFUUIDCreate(NULL);

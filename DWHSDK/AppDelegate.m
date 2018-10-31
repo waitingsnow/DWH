@@ -21,7 +21,7 @@
     
     NSLog(@"uid:%@",[DWHSDK keychain_id]);
     
-    return TRUE;
+//    [[DWHSDK dwhSDK] setLogLevel:DWHSDKLogLevelInfo];
     NSLog(@"att json:%@",[@{} toJSonString]);
     NSMutableDictionary *dic = [NSMutableDictionary new];
     [dic setValue:[NSNull null] forKey:[NSNull null]];
@@ -32,19 +32,19 @@
     [[DWHSDK dwhSDK] updateUserProperties:@{@"c":@1,@"e":@(1.89765)}];
 //    dispatch_queue_t t =  dispatch_queue_create("hw_queue_event_handle", DISPATCH_QUEUE_CONCURRENT);
 //    dispatch_async(t, ^{
-        [[DWHSDK dwhSDK] logEvent:@"aaaa" withEventProperties:@{@"aaa":@"bbb"}];
+//        [[DWHSDK dwhSDK] logEvent:@"aaaa" withEventProperties:@{@"aaa":@"bbb"}];
 //    });
 //    dispatch_async(t, ^{
 //       [[DWHSDK dwhSDK] updateUserProperties:@{@"c":@1,@"e":@(1.89765)}];
 //    });
 //    dispatch_async(t, ^{
-        [[DWHSDK dwhSDK] logEvent:@"bbbbb" withEventProperties:@{@"ccccc":@"bbb"}];
+//        [[DWHSDK dwhSDK] logEvent:@"bbbbb" withEventProperties:@{@"ccccc":@"bbb"}];
 //    });
 //    dispatch_async(t, ^{
 //        [[DWHSDK dwhSDK] updateUserProperties:@{@"c":@1,@"e":@(1.89765)}];
 //    });
 //    dispatch_async(t, ^{
-        [[DWHSDK dwhSDK] logEvent:@"ddddddd" withEventProperties:@{@"eeeeee":@"bbb"}];
+//        [[DWHSDK dwhSDK] logEvent:@"ddddddd" withEventProperties:@{@"eeeeee":@"bbb"}];
 //    });
 //    dispatch_async(t, ^{
 //        [[DWHSDK dwhSDK] updateUserProperties:@{@"c":@1,@"e":@(1.89765)}];

@@ -8,12 +8,23 @@
 
 #import <Foundation/Foundation.h>
 
+typedef enum : NSUInteger {
+    DWHSDKLogLevelInfo,
+    DWHSDKLogLevelWarning,
+    DWHSDKLogLevelError,
+    DWHSDKLogLevelNone,
+} DWHSDKLogLevel;
 @interface DWHSDK : NSObject
 
 + (instancetype)dwhSDK;
 
 + (NSString *)sdkVersion;
 
+- (void)setLogLevel:(DWHSDKLogLevel)logLevel;
+/**
+ 秒
+ **/
+- (void)setServerTime:(long long)serverTime;
 /**
  初始化
  isProduction = false测试环境 会显示日志 测试服务器地址
@@ -41,6 +52,12 @@
 - (void)logEvent:(NSString *)eventName;
 - (void)logEvent:(NSString *)eventName  withEventProperties:(NSDictionary * _Nullable)attributes;
 
+/**
+ 每次随机UID
+ **/
++ (NSString *)randomUUID;
+
++ (NSString *)device_id;
 /**
  获取唯一不变的id
  **/

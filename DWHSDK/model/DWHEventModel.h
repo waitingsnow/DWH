@@ -14,5 +14,7 @@
 @property (nonatomic, copy) NSString *eventName;
 @property (nonatomic, copy) NSString *attributes;
 @property (nonatomic, assign) long long at;
-
+@property (nonatomic, copy) NSString *device_id;
+@property (nonatomic, copy) NSString *keychain_id;
+@property (nonatomic, copy) NSString *session_id;
 @end

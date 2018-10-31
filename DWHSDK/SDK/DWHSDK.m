@@ -19,6 +19,7 @@
 #import <AdSupport/AdSupport.h>
 #import <UICKeyChainStore/UICKeyChainStore.h>
 #import <CocoaSecurity/CocoaSecurity.h>
+#import <UIKit/UIKit.h>
 typedef void (^UploadCompleteBlock)(BOOL success);
 static NSInteger minDelayUploadEvent  = 1;
 static NSInteger maxDelayUploadEvent  = 5;
@@ -34,7 +35,10 @@ static NSInteger maxDelayUploadEvent  = 5;
 @property (nonatomic, assign) NSInteger userId;
 @property (nonatomic, assign) NSInteger projectID;
 @property (nonatomic, copy) NSString *auth;
-
+@property (nonatomic, copy) NSString *currentSessionId;
+@property (nonatomic, assign) DWHSDKLogLevel dwhLogLevel;
+@property (nonatomic, assign) long long appStartTime;
+@property (nonatomic, assign) long long serverStandardTime;
 @end
 
 static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
@@ -49,7 +53,20 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     });
     return _modelManager;
 }
-
+- (void)setLogLevel:(DWHSDKLogLevel)logLevel{
+    self.dwhLogLevel = logLevel;
+}
+- (void)setServerTime:(long long)serverTime{
+    self.serverStandardTime = serverTime;
+    long long time =  self.serverStandardTime - ([[NSProcessInfo processInfo] systemUptime]-self.appStartTime);
+    self.appStartTime = [[NSProcessInfo processInfo] systemUptime];
+    if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
+        NSLog(@"DWHSDK ----------> 设置服务器时间:%lld",self.serverStandardTime);
+    }
+    [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
+        [db dWHExecDelete:[NSString stringWithFormat:@"update  DWHEventModel set at = %lld where at = -1",time]];
+    }];
+}
 - (void)initializeProjectId:(NSInteger )projectId isProductionEnv:(BOOL)isProduction{
     self.projectID = projectId;
     self.auth = @"";
@@ -75,10 +92,15 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }
     _userId = userId;
     if(self.isStopUsingDataWarehouse){
+        if (DWHSDKLogLevelWarning >= self.dwhLogLevel) {
+            NSLog(@"DWHSDK ----------> warning log sdk已暂停");
+        }
         return ;
     }
     if(!self.projectID){
-        NSLog(@"没有 project ID.....................................................");
+        if (DWHSDKLogLevelError >= self.dwhLogLevel) {
+             NSLog(@"DWHSDK ----------> error log 没有设置projectID");
+        }
         return;
     }
     if (userId!=0) {
@@ -104,6 +126,9 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         [HWClient putToPath:@"v1/user/session" withParameters:mudic auth:nil completeBlock:^(BOOL success, id result) {
             if (success && result && result[@"auth"]) {
                 self.auth = [NSString stringWithFormat:@"%@",result[@"auth"]];
+                if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
+                    NSLog(@"DWHSDK ----------> info log userId设置成功已经拿到auth");
+                }
                 [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
                     [db dWHExecUpdate:[NSString stringWithFormat:@"update DWHEventModel set auth ='%@' where auth is null or trim(auth)='' ",self.auth]];
                 }];
@@ -147,8 +172,18 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         _backgroundQueue = [[NSOperationQueue alloc] init];
         [_backgroundQueue setMaxConcurrentOperationCount:1];
         _backgroundQueue.name = BACKGROUND_QUEUE_NAME;
+        self.currentSessionId = [DWHSDK randomUUID];
+        self.dwhLogLevel = DWHSDKLogLevelNone;
+        self.appStartTime = (long long)[[NSProcessInfo processInfo] systemUptime];
+        NSLog(@"DWH-------------------->sessionid:%@ start time:%lld",self.currentSessionId,self.appStartTime);
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillResignActive)
+                                                     name:UIApplicationWillEnterForegroundNotification object:nil];
     }
     return self;
+}
+- (void)applicationWillResignActive{
+    self.currentSessionId = [DWHSDK randomUUID];
+    NSLog(@"DWH-------------------->new sessionid:%@",self.currentSessionId);
 }
 - (BOOL)runOnBackgroundQueue:(void (^)(void))block{
     if ([[NSOperationQueue currentQueue].name isEqualToString:BACKGROUND_QUEUE_NAME]) {
@@ -200,10 +235,11 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         return ;
     }
     NSMutableDictionary *mudic = [DWHUserPropertiesModel dWHQueryForDictionary:@"select uid  from DWHUserPropertiesModel where auth is not null and trim(auth) !=''"];
-    if (self.showLog) {
-        //        NSLog(@"轮询检测user properties :%@",mudic);
-    }
+   
     if (mudic && mudic[@"uid"]) {
+        if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
+            NSLog(@"DWHSDK ----------> info log 5秒轮询 检测上传 User properties 有数据准备上传");
+        }
         NSString *uid = [NSString stringWithFormat:@"%@",mudic[@"uid"]];
         NSArray *properties = [DWHUserPropertiesModel dWHQueryForObjectArray:[NSString stringWithFormat:@"select * from DWHUserPropertiesModel where uid = '%@'",uid]];
         NSArray *arrayId = [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId from DWHUserPropertiesModel where uid = '%@'",uid]];
@@ -222,12 +258,21 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
                 [para setValue:dic[pName.columnName] forKey:pName.columnName];
             }
         }
+        if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
+            NSLog(@"DWHSDK ----------> info log 上传 User properties:%@",para);
+        }
         [HWClient putToPath:@"v1/user" withParameters:para auth:auth completeBlock:^(BOOL success, id result) {
             if (success) {
                 [DWHUserPropertiesModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
                     [db dWHExecDelete:[NSString stringWithFormat:@"delete from DWHUserPropertiesModel where autoIncrementId in (%@)",[deleteId componentsJoinedByString:@","]]];
                 }];
+                if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
+                    NSLog(@"DWHSDK ----------> info log  User properties 更新成功");
+                }
             }else{
+                if (DWHSDKLogLevelWarning >= self.dwhLogLevel) {
+                    NSLog(@"DWHSDK ----------> warning log  User properties 更新失败");
+                }
                 if([result intValue] >= 500){
                     self.failureCount = self.failureCount +1;
                 }
@@ -270,8 +315,20 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }
     DWHEventModel *event = [[DWHEventModel alloc] init];
     event.eventName = eventName;
-    event.at = [self curentTime];
+    if (self.serverStandardTime == 0) {
+         event.at = -1;
+    }else{
+        long long seconds = [[NSProcessInfo processInfo] systemUptime]-self.appStartTime;
+        event.at = self.serverStandardTime+seconds;
+    }
+   
     event.auth = self.auth;
+    event.device_id = [DWHSDK device_id];
+    event.keychain_id = [DWHSDK keychain_id];
+    if (!self.currentSessionId.length) {
+        self.currentSessionId = [DWHSDK randomUUID];
+    }
+    event.session_id = self.currentSessionId;
     if (!attributes) {
         attributes = @{};
     }
@@ -280,11 +337,15 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     __block __weak DWHSDK *weakSelf = self;
     [self runOnBackgroundQueue:^{
         [event dWHSave:nil];
-        if (weakSelf.showLog) {
-            //             NSLog(@"event 打点:%@",attributes);
+        if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
+            NSLog(@"DWHSDK ----------> info log %@",attributes);
         }
         if (!weakSelf.isUploadingEventNow) {
             [weakSelf delayCheckToUploadEvent:maxDelayUploadEvent];
+        }else{
+            if (DWHSDKLogLevelWarning >= self.dwhLogLevel) {
+                NSLog(@"DWHSDK ----------> warning log DWHSDK 已经暂停");
+            }
         }
     }];
 }
@@ -299,13 +360,17 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     if (self.isUploadingEventNow) {
         return;
     }
-    NSMutableDictionary * dic = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where auth is not null and trim(auth) !='' order by autoIncrementId desc  limit 1 OFFSET 1"];
-    if (self.showLog) {
-        //        NSLog(@"轮询检测event 30秒 :%@",dic);
+    NSMutableDictionary * dic = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where auth is not null and trim(auth) !=''  and at != -1 order by autoIncrementId desc  limit 1 OFFSET 1"];
+    
+    if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
+        NSLog(@"DWHSDK ----------> info log 5秒轮询 未上传的event");
     }
     if (dic && dic[@"at"]) {
         long long  at = [dic[@"at"] longLongValue];
         if ([self curentTime] - at >= 30) {
+            if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
+                NSLog(@"DWHSDK ----------> info log 有超过30秒未上传的event");
+            }
             NSString *auth = [NSString stringWithFormat:@"%@",dic[@"auth"]];
             NSMutableArray *uploadArr = [self getEventByAuth:auth];
             NSArray *arrId = [self getEventIdByAuth:auth];
@@ -319,14 +384,17 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         }
     }
     
-    NSMutableDictionary * countDic = [DWHEventModel dWHQueryForDictionary:@"select count(*) as count from DWHEventModel where auth is not null and trim(auth) !=''"];
+    NSMutableDictionary * countDic = [DWHEventModel dWHQueryForDictionary:@"select count(*) as count from DWHEventModel where auth is not null and trim(auth) !='' and at != -1"];
     if (self.showLog) {
         //        NSLog(@"轮询检测event 10条 :%@",countDic);
     }
     if (countDic && countDic[@"count"]) {
         int rowCount = [countDic[@"count"] intValue];
         if (rowCount >= 10) {
-            NSMutableDictionary * authDic = [DWHEventModel dWHQueryForDictionary:@"select auth from DWHEventModel where auth is not null and trim(auth) !=''  limit 1"];
+            if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
+                NSLog(@"DWHSDK ----------> info log 有超过10条未上传的event");
+            }
+            NSMutableDictionary * authDic = [DWHEventModel dWHQueryForDictionary:@"select auth from DWHEventModel where auth is not null and trim(auth) !='' and at != -1  limit 1"];
             //            NSLog(@"authDic:%@",authDic);
             if (authDic && authDic[@"auth"]) {
                 NSString *auth = [NSString stringWithFormat:@"%@",authDic[@"auth"]];
@@ -344,13 +412,16 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         }
     }
     
-    NSMutableDictionary * lastOne = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where auth is not null and trim(auth) !='' order by autoIncrementId desc  limit 1"];
+    NSMutableDictionary * lastOne = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where auth is not null and trim(auth) !='' and at != -1 order by autoIncrementId desc  limit 1"];
     if (self.showLog) {
         //        NSLog(@"轮询检测event 最后一条 :%@",lastOne);
     }
     if (lastOne && lastOne[@"at"]) {
         long long  at = [lastOne[@"at"] longLongValue];
         if ([self curentTime] - at >= 30) {
+            if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
+                NSLog(@"DWHSDK ----------> info log 有超过30秒未上传的打点");
+            }
             NSString *auth = [NSString stringWithFormat:@"%@",lastOne[@"auth"]];
             NSMutableArray *uploadArr = [self getEventByAuth:auth];
             NSArray *arrId = [self getEventIdByAuth:auth];
@@ -402,6 +473,9 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         NSDictionary *dic = [model.attributes toDictionary];
         [uploadPar setValue:dic forKey:@"attributes"];
         [uploadPar setValue:@(model.at) forKey:@"at"];
+        [uploadPar setValue:model.keychain_id forKey:@"keychain_id"];
+        [uploadPar setValue:model.device_id forKey:@"device_id"];
+        [uploadPar setValue:model.session_id forKey:@"session_id"];
         [uploadArr addObject:uploadPar];
     }
     return uploadArr;
@@ -414,6 +488,9 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         return ;
     }
     self.isUploadingEventNow = YES;
+    if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
+        NSLog(@"DWHSDK ----------> info log 上传打点:%@",@{@"events":events});
+    }
     [HWClient postToPath:@"v1/event" withParameters:@{@"events":events} auth:auth completeBlock:^(BOOL success, id result) {
         self.isUploadingEventNow = FALSE;
         if (self.showLog) {
@@ -424,12 +501,21 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         }
         if(!success && [result intValue] >= 500){
             self.failureCount = self.failureCount +1;
+            if (DWHSDKLogLevelError >= self.dwhLogLevel) {
+                NSLog(@"DWHSDK ----------> error log 打点上传发生500以上的错误:%@ 失败次数:%li",result,self.failureCount);
+            }
         }
         if((!success && [result intValue] == 404) || (!success && [result intValue] == 410)){
             self.failureCount = self.failureCount +1;
+            if (DWHSDKLogLevelError >= self.dwhLogLevel) {
+                NSLog(@"DWHSDK ----------> error log 打点上传发生410 404 的错误:%@ 失败次数:%li",result,self.failureCount);
+            }
         }
         if (self.failureCount > 3) {
             [[NSUserDefaults standardUserDefaults] setValue:@"1" forKey:[NSString stringWithFormat:@"%@%@",StopUsingDataWarehouse,[[NSBundle mainBundle].infoDictionary objectForKey:@"CFBundleShortVersionString"]]];
+            if (DWHSDKLogLevelError >= self.dwhLogLevel) {
+                NSLog(@"DWHSDK ----------> error log DWH sdk 失败次数过多已经暂停访问");
+            }
         }
         if (!success && [result integerValue] == 401) {
             [self handleHTTP401Error:auth];
@@ -444,6 +530,9 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         [db dWHExecUpdate:[NSString stringWithFormat:@"update DWHUserPropertiesModel set auth ='' where auth =  '%@'",auth]];
     }];
     [self setUserId:self.userId withProperties:self.userProperties];
+    if (DWHSDKLogLevelError >= self.dwhLogLevel) {
+        NSLog(@"DWHSDK ----------> error log 打点上传发生401错误,重置auth");
+    }
 }
 
 - (long long)curentTime{
@@ -459,8 +548,44 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 + (NSString *)sdkVersion{
     return @"0.69";
 }
++ (NSString *)device_id{
+    BOOL on = [[ASIdentifierManager sharedManager] isAdvertisingTrackingEnabled];
+   NSString *uuidString = @"";
+    if (on) {
+        uuidString =  [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
+    }
+    if (uuidString.length < 10) {
+        NSString *key = [[UICKeyChainStore keyChainStore] stringForKey:@"DWHAPPDeviceID"];
+        if (key.length) {
+            return key;
+        }else{
+            CFUUIDRef uuid;
+            CFStringRef uuidStr;
+            uuid = CFUUIDCreate(NULL);
+            uuidStr = CFUUIDCreateString(NULL, uuid);
+            uuidString =[NSString stringWithFormat:@"%@-%lld",uuidStr,(long long)[[NSDate date] timeIntervalSince1970]];
+            CFRelease(uuidStr);
+            CFRelease(uuid);
+            NSString *md5 = [CocoaSecurity md5:uuidString].hex;
+            [[UICKeyChainStore keyChainStore] setString:md5 forKey:@"DWHAPPDeviceID"];
+            return md5;
+        }
+    }else{
+        return uuidString;
+    }
+}
++ (NSString *)randomUUID{
+    CFUUIDRef uuid;
+    CFStringRef uuidStr;
+    uuid = CFUUIDCreate(NULL);
+    uuidStr = CFUUIDCreateString(NULL, uuid);
+    NSString * uuidString =[NSString stringWithFormat:@"%@",uuidStr];
+    CFRelease(uuidStr);
+    CFRelease(uuid);
+    return uuidString;
+}
 + (NSString *)keychain_id{
-    NSString *key = [[UICKeyChainStore keyChainStore] stringForKey:@"DWAPPUID"];
+    NSString *key = [[UICKeyChainStore keyChainStore] stringForKey:@"DWHAPPUID"];
     if (key) {
         return key;
     }
@@ -480,7 +605,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }
     NSString *md5 = [CocoaSecurity md5:uuidString].hex;
     if (md5.length) {
-        [[UICKeyChainStore keyChainStore] setString:md5 forKey:@"DWAPPUID"];
+        [[UICKeyChainStore keyChainStore] setString:md5 forKey:@"DWHAPPUID"];
     }
     return md5;
 }

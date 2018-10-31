@@ -29,19 +29,7 @@ static dispatch_once_t onceToken;
     showsql = showlog;
 	if (showsql) {
 		NSLog(@"dbpath:%@",path);
-	}
-	
-//	if (sqlite3_open([DBPath UTF8String], &database)== SQLITE_OK) {
-//		int status = sqlite3_exec(database, "PRAGMA journal_mode=WAL;", NULL, NULL, NULL);
-//		status = sqlite3_exec(database, "PRAGMA synchronous = NORMAL; ", 0,0,0);
-//		status = sqlite3_exec(database, "PRAGMA SQLITE_THREADSAFE = 2; ", 0,0,0);
-//		status = sqlite3_exec(database, "PRAGMA temp_store = MEMORY; ", 0,0,0);
-//		status = sqlite3_exec(database, "PRAGMA default_cache_size =8000; ", 0,0,0);
-//		status = sqlite3_exec(database, "PRAGMA mmap_size= 2000; ", 0,0,0);
-//		NSLog(@"sqlstatus:%i",status);
-//		sqlite3_wal_autocheckpoint(database, 300);
-//	}
-	
+	}	
 }
 
 +(void)beginTransaction{
@@ -75,9 +63,9 @@ static dispatch_once_t onceToken;
 	DWHORMDB *currentSyncQueue = (__bridge id)dispatch_get_specific(kDispatchQueueSpecificKey);
 	assert(currentSyncQueue != self && "inDatabase: was called reentrantly on the same queue, which would lead to a deadlock");
 	
-	if(showsql){
-		NSLog(@"%@",sql);
-	}
+//    if(showsql){
+//        NSLog(@"%@",sql);
+//    }
 	
 	sqlite3_stmt *statement;
 	sqlite3_prepare_v2(DWHdatabase, [sql UTF8String], -1, &statement, NULL);
@@ -94,9 +82,9 @@ static dispatch_once_t onceToken;
 +(BOOL)rowExist:(NSString *)sql{
 	
 	BOOL result=FALSE;
-	if(showsql){
-		NSLog(@"%@",sql);
-	}
+//    if(showsql){
+//        NSLog(@"%@",sql);
+//    }
 	sqlite3_stmt *statement;
 	if ((sqlite3_prepare_v2(DWHdatabase, [sql UTF8String], -1, &statement, nil)==SQLITE_OK)  ) {
 		
@@ -156,9 +144,9 @@ static dispatch_once_t onceToken;
 	if (sqlite3_open([DBPath UTF8String], &queryDB) == SQLITE_OK &&
 		(sqlite3_prepare_v2(queryDB, [sql UTF8String], -1, &statement, nil) ==
 		 SQLITE_OK)) {
-			if (showsql) {
-				NSLog(@"%@", sql);
-			}
+//            if (showsql) {
+//                NSLog(@"%@", sql);
+//            }
 			
 			@try{
 				int columnCount = sqlite3_column_count(statement);
@@ -185,9 +173,9 @@ static dispatch_once_t onceToken;
 	if (sqlite3_open([DBPath UTF8String], &queryDB) == SQLITE_OK &&
 		(sqlite3_prepare_v2(queryDB, [sql UTF8String], -1, &statement, nil) ==
 		 SQLITE_OK)) {
-			if (showsql) {
-				NSLog(@"%@", sql);
-			}
+//            if (showsql) {
+//                NSLog(@"%@", sql);
+//            }
 			int columnCount = sqlite3_column_count(statement);
 			NSMutableDictionary *tmpColumn =
 			[[NSMutableDictionary alloc] initWithCapacity:columnCount];
@@ -336,9 +324,9 @@ static dispatch_once_t onceToken;
 	DWHORMDB *currentSyncQueue = (__bridge id)dispatch_get_specific(kDispatchQueueSpecificKey);
 	assert(currentSyncQueue != self && "inDatabase: was called reentrantly on the same queue, which would lead to a deadlock");
 	
-	if (showsql) {
-		NSLog(@"%@",sql);
-	}
+//    if (showsql) {
+//        NSLog(@"%@",sql);
+//    }
 	
 	
 	DWHORMDBClassInfo *obj= [DWHORMDBClassInfo metaWithClass:[entity class]];

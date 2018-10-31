@@ -44,6 +44,7 @@
 		99A847F520E3BF9C00D430BF /* DWHSDK.h in Headers */ = {isa = PBXBuildFile; fileRef = 99A847F320E3BF9C00D430BF /* DWHSDK.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		99A847F620E3BF9C00D430BF /* DWHSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = 99A847F420E3BF9C00D430BF /* DWHSDK.m */; };
 		99A847F720E3BF9C00D430BF /* DWHSDK.m in Sources */ = {isa = PBXBuildFile; fileRef = 99A847F420E3BF9C00D430BF /* DWHSDK.m */; };
+		99C2F3CD218969610018A4FB /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99C2F3CC218969610018A4FB /* UIKit.framework */; };
 		99DF8A4420E5D71F007F78C5 /* NSDictionary+Extension.h in Headers */ = {isa = PBXBuildFile; fileRef = 99DF8A4220E5D71F007F78C5 /* NSDictionary+Extension.h */; };
 		99DF8A4520E5D71F007F78C5 /* NSDictionary+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 99DF8A4320E5D71F007F78C5 /* NSDictionary+Extension.m */; };
 		99DF8A4620E5D71F007F78C5 /* NSDictionary+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 99DF8A4320E5D71F007F78C5 /* NSDictionary+Extension.m */; };
@@ -116,6 +117,7 @@
 		99A847F320E3BF9C00D430BF /* DWHSDK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWHSDK.h; sourceTree = "<group>"; };
 		99A847F420E3BF9C00D430BF /* DWHSDK.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWHSDK.m; sourceTree = "<group>"; };
 		99A847F820E3C17800D430BF /* libsqlite3.0.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.0.tbd; path = usr/lib/libsqlite3.0.tbd; sourceTree = SDKROOT; };
+		99C2F3CC218969610018A4FB /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		99DF8A4220E5D71F007F78C5 /* NSDictionary+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+Extension.h"; sourceTree = "<group>"; };
 		99DF8A4320E5D71F007F78C5 /* NSDictionary+Extension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+Extension.m"; sourceTree = "<group>"; };
 		99FC4DE12188510E007F32CE /* AdSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdSupport.framework; path = System/Library/Frameworks/AdSupport.framework; sourceTree = SDKROOT; };
@@ -128,6 +130,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				99C2F3CD218969610018A4FB /* UIKit.framework in Frameworks */,
 				99FC4DE22188510E007F32CE /* AdSupport.framework in Frameworks */,
 				99A847F120E3B80E00D430BF /* libsqlite3.tbd in Frameworks */,
 				99A8479F20E3B09400D430BF /* DWH.framework in Frameworks */,
@@ -259,6 +262,7 @@
 		D1C3DC22E7869E848C9E342B /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				99C2F3CC218969610018A4FB /* UIKit.framework */,
 				99FC4DE12188510E007F32CE /* AdSupport.framework */,
 				99A847F820E3C17800D430BF /* libsqlite3.0.tbd */,
 				99A847EF20E3B80400D430BF /* libsqlite3.tbd */,

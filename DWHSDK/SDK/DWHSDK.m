@@ -58,13 +58,13 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 }
 - (void)setServerTime:(long long)serverTime{
     self.serverStandardTime = serverTime;
-    long long time =  self.serverStandardTime - ([[NSProcessInfo processInfo] systemUptime]-self.appStartTime);
+//    long long time =  self.serverStandardTime - ([[NSProcessInfo processInfo] systemUptime]-self.appStartTime);
     self.appStartTime = [[NSProcessInfo processInfo] systemUptime];
     if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
         NSLog(@"DWHSDK ----------> 设置服务器时间:%lld",self.serverStandardTime);
     }
     [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
-        [db dWHExecDelete:[NSString stringWithFormat:@"update  DWHEventModel set at = %lld where at = -1",time]];
+        [db dWHExecDelete:[NSString stringWithFormat:@"update  DWHEventModel set at = %lld where at = -1",serverTime]];
     }];
 }
 - (void)initializeProjectId:(NSInteger )projectId isProductionEnv:(BOOL)isProduction{

@@ -18,7 +18,7 @@
 #import "DWHEventId.h"
 #import <AdSupport/AdSupport.h>
 #import <UICKeyChainStore/UICKeyChainStore.h>
-#import <CocoaSecurity/CocoaSecurity.h>
+#import "NSData+DWHAdd.h"
 #import <UIKit/UIKit.h>
 typedef void (^UploadCompleteBlock)(BOOL success);
 static NSInteger minDelayUploadEvent  = 1;
@@ -566,7 +566,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
             uuidString =[NSString stringWithFormat:@"%@-%lld",uuidStr,(long long)[[NSDate date] timeIntervalSince1970]];
             CFRelease(uuidStr);
             CFRelease(uuid);
-            NSString *md5 = [CocoaSecurity md5:uuidString].hex;
+            NSString *md5 = [[[uuidString dataUsingEncoding:NSUTF8StringEncoding] md5String] uppercaseString];
             [[UICKeyChainStore keyChainStore] setString:md5 forKey:@"DWHAPPDeviceID"];
             return md5;
         }
@@ -603,7 +603,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         CFRelease(uuidStr);
         CFRelease(uuid);
     }
-    NSString *md5 = [CocoaSecurity md5:uuidString].hex;
+   NSString *md5 = [[[uuidString dataUsingEncoding:NSUTF8StringEncoding] md5String] uppercaseString];
     if (md5.length) {
         [[UICKeyChainStore keyChainStore] setString:md5 forKey:@"DWHAPPUID"];
     }

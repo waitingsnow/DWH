@@ -22,6 +22,9 @@
 		9956442E20E60DCD008ADE26 /* DWHSDKTool.h in Headers */ = {isa = PBXBuildFile; fileRef = 9956442C20E60DCD008ADE26 /* DWHSDKTool.h */; };
 		9956442F20E60DCD008ADE26 /* DWHSDKTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 9956442D20E60DCD008ADE26 /* DWHSDKTool.m */; };
 		9956443020E60DCD008ADE26 /* DWHSDKTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 9956442D20E60DCD008ADE26 /* DWHSDKTool.m */; };
+		99582C5F218A962C00F74CA5 /* NSData+DWHAdd.h in Headers */ = {isa = PBXBuildFile; fileRef = 99582C5D218A962C00F74CA5 /* NSData+DWHAdd.h */; };
+		99582C60218A962C00F74CA5 /* NSData+DWHAdd.m in Sources */ = {isa = PBXBuildFile; fileRef = 99582C5E218A962C00F74CA5 /* NSData+DWHAdd.m */; };
+		99582C61218A962C00F74CA5 /* NSData+DWHAdd.m in Sources */ = {isa = PBXBuildFile; fileRef = 99582C5E218A962C00F74CA5 /* NSData+DWHAdd.m */; };
 		9964D82220EA40A100BDD336 /* DWHEventId.h in Headers */ = {isa = PBXBuildFile; fileRef = 9964D82020EA40A100BDD336 /* DWHEventId.h */; };
 		9964D82320EA40A100BDD336 /* DWHEventId.m in Sources */ = {isa = PBXBuildFile; fileRef = 9964D82120EA40A100BDD336 /* DWHEventId.m */; };
 		9964D82420EA40A100BDD336 /* DWHEventId.m in Sources */ = {isa = PBXBuildFile; fileRef = 9964D82120EA40A100BDD336 /* DWHEventId.m */; };
@@ -92,6 +95,8 @@
 		992917B720E4CEDF00233AC4 /* DWHUserPropertiesModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWHUserPropertiesModel.m; sourceTree = "<group>"; };
 		9956442C20E60DCD008ADE26 /* DWHSDKTool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWHSDKTool.h; sourceTree = "<group>"; };
 		9956442D20E60DCD008ADE26 /* DWHSDKTool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWHSDKTool.m; sourceTree = "<group>"; };
+		99582C5D218A962C00F74CA5 /* NSData+DWHAdd.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSData+DWHAdd.h"; sourceTree = "<group>"; };
+		99582C5E218A962C00F74CA5 /* NSData+DWHAdd.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSData+DWHAdd.m"; sourceTree = "<group>"; };
 		9964D82020EA40A100BDD336 /* DWHEventId.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWHEventId.h; sourceTree = "<group>"; };
 		9964D82120EA40A100BDD336 /* DWHEventId.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWHEventId.m; sourceTree = "<group>"; };
 		99A8477A20E3B07600D430BF /* DWHSDK.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DWHSDK.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -184,6 +189,8 @@
 				99DF8A4320E5D71F007F78C5 /* NSDictionary+Extension.m */,
 				9956442C20E60DCD008ADE26 /* DWHSDKTool.h */,
 				9956442D20E60DCD008ADE26 /* DWHSDKTool.m */,
+				99582C5D218A962C00F74CA5 /* NSData+DWHAdd.h */,
+				99582C5E218A962C00F74CA5 /* NSData+DWHAdd.m */,
 			);
 			path = Tools;
 			sourceTree = "<group>";
@@ -280,6 +287,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				992917B320E4B89400233AC4 /* NSString+Extension.h in Headers */,
+				99582C5F218A962C00F74CA5 /* NSData+DWHAdd.h in Headers */,
 				9964D82220EA40A100BDD336 /* DWHEventId.h in Headers */,
 				992917B820E4CEDF00233AC4 /* DWHUserPropertiesModel.h in Headers */,
 				99DF8A4420E5D71F007F78C5 /* NSDictionary+Extension.h in Headers */,
@@ -416,12 +424,10 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-DWHCommon-DWHSDK/Pods-DWHCommon-DWHSDK-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/CocoaSecurity/CocoaSecurity.framework",
 				"${BUILT_PRODUCTS_DIR}/UICKeyChainStore/UICKeyChainStore.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CocoaSecurity.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/UICKeyChainStore.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -455,6 +461,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				992917AF20E48D6900233AC4 /* DWHEventModel.m in Sources */,
+				99582C60218A962C00F74CA5 /* NSData+DWHAdd.m in Sources */,
 				99A847F620E3BF9C00D430BF /* DWHSDK.m in Sources */,
 				99DF8A4520E5D71F007F78C5 /* NSDictionary+Extension.m in Sources */,
 				992917A520E484E900233AC4 /* HWClient.m in Sources */,
@@ -479,6 +486,7 @@
 				992917A620E484E900233AC4 /* HWClient.m in Sources */,
 				99DF8A4620E5D71F007F78C5 /* NSDictionary+Extension.m in Sources */,
 				99A847B620E3B28600D430BF /* DWHORMDB.m in Sources */,
+				99582C61218A962C00F74CA5 /* NSData+DWHAdd.m in Sources */,
 				992917BA20E4CEDF00233AC4 /* DWHUserPropertiesModel.m in Sources */,
 				9964D82420EA40A100BDD336 /* DWHEventId.m in Sources */,
 				99A847B420E3B28600D430BF /* DWHNSObject+ORM.m in Sources */,
@@ -638,10 +646,7 @@
 				DEVELOPMENT_TEAM = Q3VZHMHCPE;
 				INFOPLIST_FILE = DWHSDK/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWHSDK;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -657,10 +662,7 @@
 				DEVELOPMENT_TEAM = Q3VZHMHCPE;
 				INFOPLIST_FILE = DWHSDK/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWHSDK;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -682,11 +684,7 @@
 				INFOPLIST_FILE = DWH/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACH_O_TYPE = staticlib;
 				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWH;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -712,11 +710,7 @@
 				INFOPLIST_FILE = DWH/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACH_O_TYPE = staticlib;
 				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWH;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";

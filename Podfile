@@ -5,7 +5,6 @@ use_frameworks!
 
 abstract_target 'DWHCommon' do
 	pod 'UICKeyChainStore'
-    pod 'CocoaSecurity'
 	target 'DWHSDK' do
 	end
 

@@ -17,4 +17,13 @@
 @property (nonatomic, copy) NSString *device_id;
 @property (nonatomic, copy) NSString *keychain_id;
 @property (nonatomic, copy) NSString *session_id;
+
+@property (nonatomic, copy) NSString *uid;
+@property (nonatomic, copy) NSString *birthday;
+@property (nonatomic, copy) NSString *gender;
+@property (nonatomic, copy) NSString *nation;
+@property (nonatomic, copy) NSString *app_verison;
+@property (nonatomic, copy) NSString *ban_status;
+@property (nonatomic, copy) NSString *longitude;
+@property (nonatomic, copy) NSString *latitude;
 @end

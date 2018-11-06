@@ -325,6 +325,33 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     event.auth = self.auth;
     event.device_id = [DWHSDK device_id];
     event.keychain_id = [DWHSDK keychain_id];
+    if(self.userProperties[@"uid"]){
+        event.uid = [NSString stringWithFormat:@"%@",self.userProperties[@"uid"]];
+    }
+    if(self.userProperties[@"birthday"]){
+        event.birthday = [NSString stringWithFormat:@"%@",self.userProperties[@"birthday"]];
+    }
+    if(self.userProperties[@"gender"]){
+        event.gender = [NSString stringWithFormat:@"%@",self.userProperties[@"gender"]];
+    }
+    if(self.userProperties[@"nation"]){
+        event.nation = [NSString stringWithFormat:@"%@",self.userProperties[@"nation"]];
+    }
+    if(self.userProperties[@"app_verison"]){
+        event.app_verison = [NSString stringWithFormat:@"%@",self.userProperties[@"app_verison"]];
+    }else{
+        event.app_verison = [NSString stringWithFormat:@"%@",[DWHSDK clientVersion]];
+    }
+    if(self.userProperties[@"ban_status"]){
+        event.ban_status = [NSString stringWithFormat:@"%@",self.userProperties[@"ban_status"]];
+    }
+    if(self.userProperties[@"longitude"]){
+        event.longitude = [NSString stringWithFormat:@"%@",self.userProperties[@"longitude"]];
+    }
+    if(self.userProperties[@"latitude"]){
+        event.latitude = [NSString stringWithFormat:@"%@",self.userProperties[@"latitude"]];
+    }
+    
     if (!self.currentSessionId.length) {
         self.currentSessionId = [DWHSDK randomUUID];
     }
@@ -473,9 +500,47 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         NSDictionary *dic = [model.attributes toDictionary];
         [uploadPar setValue:dic forKey:@"attributes"];
         [uploadPar setValue:@(model.at) forKey:@"at"];
-        [uploadPar setValue:model.keychain_id forKey:@"keychain_id"];
-        [uploadPar setValue:model.device_id forKey:@"device_id"];
-        [uploadPar setValue:model.session_id forKey:@"session_id"];
+        
+        NSMutableDictionary *common = [[NSMutableDictionary alloc] init];
+        if(model.uid.length){
+            [common setValue:model.uid forKey:@"uid"];
+        }
+        [common setValue:@"iOS" forKey:@"platform"];
+        if(model.birthday.length){
+            [common setValue:model.birthday forKey:@"birthday"];
+        }
+        if(model.gender.length){
+            [common setValue:model.gender forKey:@"gender"];
+        }
+        if(model.nation.length){
+            [common setValue:model.nation forKey:@"nation"];
+        }
+        if(model.app_verison.length){
+            [common setValue:model.app_verison forKey:@"app_verison"];
+        }
+        if(model.ban_status.length){
+            [common setValue:model.ban_status forKey:@"ban_status"];
+        }
+        if(model.longitude.length){
+            [common setValue:model.longitude forKey:@"longitude"];
+        }
+        if(model.latitude.length){
+            [common setValue:model.latitude forKey:@"latitude"];
+        }
+        if(model.keychain_id.length){
+            [common setValue:model.keychain_id forKey:@"keychain_id"];
+        }else{
+            [common setValue:[DWHSDK keychain_id]forKey:@"keychain_id"];
+        }
+        if(model.device_id.length){
+             [common setValue:model.device_id forKey:@"device_id"];
+        }else{
+            [common setValue:[DWHSDK device_id] forKey:@"device_id"];
+        }
+        if(model.session_id.length){
+            [common setValue:model.session_id forKey:@"session_id"];
+        }
+        [uploadPar setValue:common forKey:@"user_properties"];
         [uploadArr addObject:uploadPar];
     }
     return uploadArr;

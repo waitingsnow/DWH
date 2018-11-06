@@ -63,7 +63,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "554"
             endingLineNumber = "554"
-            landmarkName = "+device_id"
+            landmarkName = "-uploadEventToServer:auth:completeBlock:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -79,7 +79,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "594"
             endingLineNumber = "594"
-            landmarkName = "+keychain_id"
+            landmarkName = "-handleHTTP401Error:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -111,7 +111,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "589"
             endingLineNumber = "589"
-            landmarkName = "+keychain_id"
+            landmarkName = "-uploadEventToServer:auth:completeBlock:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

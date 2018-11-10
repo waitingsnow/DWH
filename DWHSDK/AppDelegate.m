@@ -21,7 +21,7 @@
     
     NSLog(@"uid:%@",[DWHSDK keychain_id]);
     
-//    [[DWHSDK dwhSDK] setLogLevel:DWHSDKLogLevelInfo];
+    [[DWHSDK dwhSDK] setLogLevel:DWHSDKLogLevelInfo];
     NSLog(@"att json:%@",[@{} toJSonString]);
     NSMutableDictionary *dic = [NSMutableDictionary new];
     [dic setValue:[NSNull null] forKey:[NSNull null]];

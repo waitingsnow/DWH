@@ -58,7 +58,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 }
 - (void)setServerTime:(long long)serverTime{
     self.serverStandardTime = serverTime;
-//    long long time =  self.serverStandardTime - ([[NSProcessInfo processInfo] systemUptime]-self.appStartTime);
     self.appStartTime = [[NSProcessInfo processInfo] systemUptime];
     if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
         NSLog(@"DWHSDK ----------> 设置服务器时间:%lld",self.serverStandardTime);
@@ -319,6 +318,9 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
          event.at = -1;
     }else{
         long long seconds = [[NSProcessInfo processInfo] systemUptime]-self.appStartTime;
+        if (self.serverStandardTime > 100000000000) {
+            seconds = ([[NSProcessInfo processInfo] systemUptime]-self.appStartTime)*1000;
+        }
         event.at = self.serverStandardTime+seconds;
     }
    
@@ -394,7 +396,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }
     if (dic && dic[@"at"]) {
         long long  at = [dic[@"at"] longLongValue];
-        if ([self curentTime] - at >= 30) {
+        if (llabs([self curentTime] - at) >= (30 * ((at > 100000000000)?1000:1))) {
             if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
                 NSLog(@"DWHSDK ----------> info log 有超过30秒未上传的event");
             }
@@ -445,7 +447,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }
     if (lastOne && lastOne[@"at"]) {
         long long  at = [lastOne[@"at"] longLongValue];
-        if ([self curentTime] - at >= 30) {
+        if (llabs([self curentTime] - at) >= (30 * ((at > 100000000000)?1000:1))) {
             if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
                 NSLog(@"DWHSDK ----------> info log 有超过30秒未上传的打点");
             }
@@ -601,7 +603,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 }
 
 - (long long)curentTime{
-    return  [[NSDate date] timeIntervalSince1970];
+    return  [[NSDate date] timeIntervalSince1970]*((self.serverStandardTime>100000000000)?1000:1);
 }
 - (BOOL)isStopUsingDataWarehouse{
     BOOL resuslt =  [[NSUserDefaults standardUserDefaults] valueForKey:[NSString stringWithFormat:@"%@%@",StopUsingDataWarehouse,[[NSBundle mainBundle].infoDictionary objectForKey:@"CFBundleShortVersionString"]]]!=nil;

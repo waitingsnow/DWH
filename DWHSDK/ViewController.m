@@ -34,9 +34,16 @@
     [self.view addSubview:test22];
     [test22 addTarget:self action:@selector(testClick3) forControlEvents:UIControlEventTouchUpInside];
     self.startTime = [[NSProcessInfo processInfo] systemUptime];
+    NSLog(@"strtTime:%lld",self.startTime);
 }
 - (void)testClick3{
     NSLog(@"t2:%f",[[NSProcessInfo processInfo] systemUptime]-self.startTime);
+    if ( [[NSDate date] timeIntervalSince1970]>100000000000) {
+        NSLog(@"毫秒");
+    }else{
+        NSLog(@"秒");
+    }
+    NSLog(@"t3:%ld",(long long)(([[NSProcessInfo processInfo] systemUptime]-self.startTime)*1000));
     [[DWHSDK dwhSDK] logEvent:@"testEvent" withEventProperties:@{}];
 //    [[DWHSDK dwhSDK] setUserId:@"5702364" withProperties:@{@"gender":@"M",@"nation":@"Germany",@"timezone":@2}];
 }

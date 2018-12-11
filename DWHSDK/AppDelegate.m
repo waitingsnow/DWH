@@ -27,9 +27,9 @@
     [dic setValue:[NSNull null] forKey:[NSNull null]];
     NSLog(@"dic:%@",dic);
     [[DWHSDK dwhSDK] initializeProjectId:1 isProductionEnv:false];
-    [[DWHSDK dwhSDK] setUserId:5702364 withProperties:@{@"gender":@"M",@"nation":@"Germany",@"timezone":@2}];
+    [[DWHSDK dwhSDK] setUserId:5702364 withProperties:@{@"gender":@"M",@"nation":@"Germany",@"timezone":@2} andToken:@"405fccc62d332df452578cbbe86d9dc2"];
 //    [[DWHSDK dwhSDK] updateCommonEventProperties:@[@"gender",@"nation"]];
-    [[DWHSDK dwhSDK] updateUserProperties:@{@"c":@1,@"e":@(1.89765)}];
+//    [[DWHSDK dwhSDK] updateUserProperties:@{@"c":@1,@"e":@(1.89765)}];
 //    dispatch_queue_t t =  dispatch_queue_create("hw_queue_event_handle", DISPATCH_QUEUE_CONCURRENT);
 //    dispatch_async(t, ^{
 //        [[DWHSDK dwhSDK] logEvent:@"aaaa" withEventProperties:@{@"aaa":@"bbb"}];

@@ -38,8 +38,8 @@ typedef enum : NSUInteger {
  @[@"timezone",@"device_language",@"device",@"platform",@"app_version",@"uid"]
  birthday 格式 YYYY-MM-dd
  */
-- (void)setUserId:(NSInteger )userId;
-- (void)setUserId:(NSInteger )userId withProperties:( NSDictionary * _Nullable )userProperties;
+- (void)setUserId:(NSInteger )userId withToken:(NSString *)token;
+- (void)setUserId:(NSInteger )userId  withProperties:( NSDictionary * _Nullable )userProperties andToken:(NSString *)token;
 
 /*
  增量 更新 userProperties
@@ -52,6 +52,7 @@ typedef enum : NSUInteger {
 - (void)logEvent:(NSString *)eventName;
 - (void)logEvent:(NSString *)eventName  withEventProperties:(NSDictionary * _Nullable)attributes;
 
+- (void)logEvent:(NSString *)eventName  withEventProperties:(NSDictionary * _Nullable)attributes andUserProperties:( NSDictionary * _Nullable)userSpecialProperties;
 /**
  每次随机UID
  **/

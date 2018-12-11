@@ -16,9 +16,7 @@
 		992917B320E4B89400233AC4 /* NSString+Extension.h in Headers */ = {isa = PBXBuildFile; fileRef = 992917B120E4B89400233AC4 /* NSString+Extension.h */; };
 		992917B420E4B89400233AC4 /* NSString+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 992917B220E4B89400233AC4 /* NSString+Extension.m */; };
 		992917B520E4B89400233AC4 /* NSString+Extension.m in Sources */ = {isa = PBXBuildFile; fileRef = 992917B220E4B89400233AC4 /* NSString+Extension.m */; };
-		992917B820E4CEDF00233AC4 /* DWHUserPropertiesModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 992917B620E4CEDF00233AC4 /* DWHUserPropertiesModel.h */; };
-		992917B920E4CEDF00233AC4 /* DWHUserPropertiesModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 992917B720E4CEDF00233AC4 /* DWHUserPropertiesModel.m */; };
-		992917BA20E4CEDF00233AC4 /* DWHUserPropertiesModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 992917B720E4CEDF00233AC4 /* DWHUserPropertiesModel.m */; };
+		9938540121A422AB001763D2 /* TestLab.m in Sources */ = {isa = PBXBuildFile; fileRef = 9938540021A422AB001763D2 /* TestLab.m */; };
 		9956442E20E60DCD008ADE26 /* DWHSDKTool.h in Headers */ = {isa = PBXBuildFile; fileRef = 9956442C20E60DCD008ADE26 /* DWHSDKTool.h */; };
 		9956442F20E60DCD008ADE26 /* DWHSDKTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 9956442D20E60DCD008ADE26 /* DWHSDKTool.m */; };
 		9956443020E60DCD008ADE26 /* DWHSDKTool.m in Sources */ = {isa = PBXBuildFile; fileRef = 9956442D20E60DCD008ADE26 /* DWHSDKTool.m */; };
@@ -91,8 +89,8 @@
 		992917AD20E48D6900233AC4 /* DWHEventModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWHEventModel.m; sourceTree = "<group>"; };
 		992917B120E4B89400233AC4 /* NSString+Extension.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+Extension.h"; sourceTree = "<group>"; };
 		992917B220E4B89400233AC4 /* NSString+Extension.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+Extension.m"; sourceTree = "<group>"; };
-		992917B620E4CEDF00233AC4 /* DWHUserPropertiesModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWHUserPropertiesModel.h; sourceTree = "<group>"; };
-		992917B720E4CEDF00233AC4 /* DWHUserPropertiesModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWHUserPropertiesModel.m; sourceTree = "<group>"; };
+		993853FF21A422AB001763D2 /* TestLab.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestLab.h; sourceTree = "<group>"; };
+		9938540021A422AB001763D2 /* TestLab.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestLab.m; sourceTree = "<group>"; };
 		9956442C20E60DCD008ADE26 /* DWHSDKTool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWHSDKTool.h; sourceTree = "<group>"; };
 		9956442D20E60DCD008ADE26 /* DWHSDKTool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWHSDKTool.m; sourceTree = "<group>"; };
 		99582C5D218A962C00F74CA5 /* NSData+DWHAdd.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSData+DWHAdd.h"; sourceTree = "<group>"; };
@@ -170,8 +168,6 @@
 			children = (
 				992917AC20E48D6900233AC4 /* DWHEventModel.h */,
 				992917AD20E48D6900233AC4 /* DWHEventModel.m */,
-				992917B620E4CEDF00233AC4 /* DWHUserPropertiesModel.h */,
-				992917B720E4CEDF00233AC4 /* DWHUserPropertiesModel.m */,
 				9964D82020EA40A100BDD336 /* DWHEventId.h */,
 				9964D82120EA40A100BDD336 /* DWHEventId.m */,
 			);
@@ -231,6 +227,8 @@
 				99A8478820E3B07600D430BF /* LaunchScreen.storyboard */,
 				99A8478B20E3B07700D430BF /* Info.plist */,
 				99A8478C20E3B07700D430BF /* main.m */,
+				993853FF21A422AB001763D2 /* TestLab.h */,
+				9938540021A422AB001763D2 /* TestLab.m */,
 			);
 			path = DWHSDK;
 			sourceTree = "<group>";
@@ -289,7 +287,6 @@
 				992917B320E4B89400233AC4 /* NSString+Extension.h in Headers */,
 				99582C5F218A962C00F74CA5 /* NSData+DWHAdd.h in Headers */,
 				9964D82220EA40A100BDD336 /* DWHEventId.h in Headers */,
-				992917B820E4CEDF00233AC4 /* DWHUserPropertiesModel.h in Headers */,
 				99DF8A4420E5D71F007F78C5 /* NSDictionary+Extension.h in Headers */,
 				992917A420E484E900233AC4 /* HWClient.h in Headers */,
 				992917AE20E48D6900233AC4 /* DWHEventModel.h in Headers */,
@@ -463,13 +460,13 @@
 				992917AF20E48D6900233AC4 /* DWHEventModel.m in Sources */,
 				99582C60218A962C00F74CA5 /* NSData+DWHAdd.m in Sources */,
 				99A847F620E3BF9C00D430BF /* DWHSDK.m in Sources */,
+				9938540121A422AB001763D2 /* TestLab.m in Sources */,
 				99DF8A4520E5D71F007F78C5 /* NSDictionary+Extension.m in Sources */,
 				992917A520E484E900233AC4 /* HWClient.m in Sources */,
 				99A8478220E3B07600D430BF /* ViewController.m in Sources */,
 				992917B420E4B89400233AC4 /* NSString+Extension.m in Sources */,
 				99A847B320E3B28600D430BF /* DWHNSObject+ORM.m in Sources */,
 				9956442F20E60DCD008ADE26 /* DWHSDKTool.m in Sources */,
-				992917B920E4CEDF00233AC4 /* DWHUserPropertiesModel.m in Sources */,
 				99A847B120E3B28600D430BF /* DWHORM.m in Sources */,
 				99A847B520E3B28600D430BF /* DWHORMDB.m in Sources */,
 				9964D82320EA40A100BDD336 /* DWHEventId.m in Sources */,
@@ -487,7 +484,6 @@
 				99DF8A4620E5D71F007F78C5 /* NSDictionary+Extension.m in Sources */,
 				99A847B620E3B28600D430BF /* DWHORMDB.m in Sources */,
 				99582C61218A962C00F74CA5 /* NSData+DWHAdd.m in Sources */,
-				992917BA20E4CEDF00233AC4 /* DWHUserPropertiesModel.m in Sources */,
 				9964D82420EA40A100BDD336 /* DWHEventId.m in Sources */,
 				99A847B420E3B28600D430BF /* DWHNSObject+ORM.m in Sources */,
 				992917B020E48D6900233AC4 /* DWHEventModel.m in Sources */,
@@ -646,7 +642,10 @@
 				DEVELOPMENT_TEAM = Q3VZHMHCPE;
 				INFOPLIST_FILE = DWHSDK/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWHSDK;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -662,7 +661,10 @@
 				DEVELOPMENT_TEAM = Q3VZHMHCPE;
 				INFOPLIST_FILE = DWHSDK/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWHSDK;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -684,7 +686,11 @@
 				INFOPLIST_FILE = DWH/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MACH_O_TYPE = staticlib;
 				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWH;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -710,7 +716,11 @@
 				INFOPLIST_FILE = DWH/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MACH_O_TYPE = staticlib;
 				PRODUCT_BUNDLE_IDENTIFIER = com.holla.dwh.DWH;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";

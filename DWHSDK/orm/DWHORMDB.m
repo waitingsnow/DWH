@@ -40,7 +40,7 @@ static dispatch_once_t onceToken;
 	if (sqlite3_open([DBPath UTF8String], &DWHdatabase)== SQLITE_OK) {
 		char *zErrorMsg =nil;
 		if(showsql){
-			NSLog(@"begin transaction ;");
+//            NSLog(@"begin transaction ;");
 		}
 		sqlite3_exec( DWHdatabase, "begin transaction ;", 0, 0, &zErrorMsg );
 		
@@ -52,7 +52,7 @@ static dispatch_once_t onceToken;
 	
 	char *zErrorMsg =nil;
 	if (showsql) {
-		NSLog(@"%@",@"commit transaction ;");
+//        NSLog(@"%@",@"commit transaction ;");
 	}
 	sqlite3_exec(DWHdatabase, "commit transaction ;", 0, 0, &zErrorMsg );
 	sqlite3_close(DWHdatabase);

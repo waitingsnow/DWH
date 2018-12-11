@@ -11,7 +11,6 @@
 #import "DWHORMDB.h"
 #import "HWClient.h"
 #import "DWHEventModel.h"
-#import "DWHUserPropertiesModel.h"
 #import "NSString+Extension.h"
 #import "NSDictionary+Extension.h"
 #import "DWHSDKTool.h"
@@ -73,17 +72,16 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     self.showLog = !isProduction;
     
     NSString *dbPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)lastObject];
-    dbPath = [dbPath stringByAppendingPathComponent:@"/dwh.db"];
+    dbPath = [dbPath stringByAppendingPathComponent:@"/dwh2.db"];
     [DWHORMDB configDBPath:dbPath showLog:self.showLog];
     [DWHEventModel dWHCreateTable];
-    [DWHUserPropertiesModel dWHCreateTable];
 }
 #pragma mark 启动sdk 获取auth
-- (void)setUserId:(NSInteger )userId {
-    [self setUserId:userId withProperties:nil];
+- (void)setUserId:(NSInteger )userId  withToken:(NSString *)token{
+    [self setUserId:userId withProperties:nil andToken:token];
 }
 
-- (void)setUserId:(NSInteger )userId withProperties:(NSDictionary *)userProperties {
+- (void)setUserId:(NSInteger )userId withProperties:(NSDictionary *)userProperties andToken:(NSString *)token{
     if (userProperties == nil) {
         self.userProperties = [[NSMutableDictionary alloc] init];
     }else {
@@ -102,7 +100,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         }
         return;
     }
-    if (userId!=0) {
+    if (userId!=0 && token.length) {
         
         NSString *birthday = [NSString stringWithFormat:@"%@",self.userProperties[@"birthday"]];
         if (birthday.length > 10) {
@@ -112,7 +110,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         [self.userProperties setValue:@(UserTimeZoneToUTC()) forKey:@"timezone"];
         [self.userProperties setValue:[NSString stringWithFormat:@"%@",[DWHSDKTool userDeviceLanguage]] forKey:@"device_language"];
         [self.userProperties setValue:[NSString stringWithFormat:@"%@",[DWHSDKTool userDeviceName]] forKey:@"device"];
-        [self.userProperties setValue:@"iOS" forKey:@"platform"];
         [self.userProperties setValue:[NSString stringWithFormat:@"%@",[DWHSDK clientVersion]] forKey:@"app_version"];
         [self.userProperties setValue:@(userId) forKey:@"uid"];
         
@@ -122,44 +119,18 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         [mudic setValue:[NSString stringWithFormat:@"%@",[DWHSDK clientVersion]] forKey:@"version"];
         [mudic setValue:self.userProperties forKey:@"attributes"];
         
-        [HWClient putToPath:@"v1/user/session" withParameters:mudic auth:nil completeBlock:^(BOOL success, id result) {
-            if (success && result && result[@"auth"]) {
-                self.auth = [NSString stringWithFormat:@"%@",result[@"auth"]];
-                if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
-                    NSLog(@"DWHSDK ----------> info log userId设置成功已经拿到auth");
-                }
-                [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
-                    [db dWHExecUpdate:[NSString stringWithFormat:@"update DWHEventModel set auth ='%@' where auth is null or trim(auth)='' ",self.auth]];
-                }];
-                [DWHUserPropertiesModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
-                    [db dWHExecUpdate:[NSString stringWithFormat:@"update DWHUserPropertiesModel set auth ='%@' where (auth is null or trim(auth)='') and uid = '%li'",self.auth,(long)self.userId]];
-                }];
-                [self runOnBackgroundQueue:^{
-                    [self checkToUploadUserPropertiesToServer];
-                    [self checkToUploadEvent];
-                }];
-            }else{
-                if([result intValue] >= 500){
-                    self.failureCount = self.failureCount +1;
-                }
-                if([result intValue] == 404 || [result intValue] == 410){
-                    self.failureCount = self.failureCount +1;
-                }
-                if (self.failureCount > 3) {
-                    [[NSUserDefaults standardUserDefaults] setValue:@"1" forKey:[NSString stringWithFormat:@"%@%@",StopUsingDataWarehouse,[[NSBundle mainBundle].infoDictionary objectForKey:@"CFBundleShortVersionString"]]];
-                }
-                if (!success && [result integerValue] == 401) {
-                    [self handleHTTP401Error:self.auth];
-                }else{
-                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                        [self setUserId:self.userId withProperties:self.userProperties];
-                    });
-                }
-            }
-            
+        self.auth = [NSString stringWithFormat:@"%@",token];
+        if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
+            NSLog(@"DWHSDK ----------> info log userId设置成功已经拿到auth");
+        }
+        [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
+            [db dWHExecUpdate:[NSString stringWithFormat:@"update DWHEventModel set auth ='%@' where auth is null or trim(auth)='' ",self.auth]];
         }];
+        [self runOnBackgroundQueue:^{
+            [self checkToUploadEvent];
+        }];
+        
     }else {
-        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkToUploadUserPropertiesToServer) object:nil];
         [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkToUploadEvent) object:nil];
         self.auth = @"";
     }
@@ -198,124 +169,30 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     if(self.isStopUsingDataWarehouse){
         return ;
     }
-    __block __weak DWHSDK *weakSelf = self;
     NSMutableDictionary *tmpDic = [userProperties mutableCopy];
-    [self runOnBackgroundQueue:^{
-        if(tmpDic){
-            for (NSString *key in tmpDic){
-                NSString *value = tmpDic[key];
-                DWHUserPropertiesModel *model = [[DWHUserPropertiesModel alloc] init];
-                model.uid = weakSelf.userId;
-                model.columnName = key;
-                if ([key isEqualToString:@"birthday"]) {
-                    if (value.length > 10) {
-                        value = [value substringToIndex:10];
-                    }
-                }
-                [weakSelf.userProperties setValue:value forKey:key];
-                model.columnValue = [@{key:value} toJSonString];
-                model.auth = weakSelf.auth;
-                [model dWHSave:@[@"uid",@"columnName"]];
+    for (NSString *key in tmpDic){
+        NSString *value = tmpDic[key];
+        if ([key isEqualToString:@"birthday"]) {
+            if (value.length > 10) {
+                value = [value substringToIndex:10];
             }
         }
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [NSObject cancelPreviousPerformRequestsWithTarget:weakSelf selector:@selector(checkToUploadUserPropertiesToServer) object:nil];
-            [weakSelf performSelector:@selector(checkToUploadUserPropertiesToServer) withObject:nil afterDelay:5];
-        });
-    }];
+        [self.userProperties setValue:value forKey:key];
+    }
 }
 
-/**
- 检查是否有未上传的 user proerties
- **/
-#pragma mark 用户属性 上传到服务器
-- (void)checkToUploadUserPropertiesToServer{
-    if(self.isStopUsingDataWarehouse){
-        return ;
-    }
-    NSMutableDictionary *mudic = [DWHUserPropertiesModel dWHQueryForDictionary:@"select uid  from DWHUserPropertiesModel where auth is not null and trim(auth) !=''"];
-   
-    if (mudic && mudic[@"uid"]) {
-        if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
-            NSLog(@"DWHSDK ----------> info log 5秒轮询 检测上传 User properties 有数据准备上传");
-        }
-        NSString *uid = [NSString stringWithFormat:@"%@",mudic[@"uid"]];
-        NSArray *properties = [DWHUserPropertiesModel dWHQueryForObjectArray:[NSString stringWithFormat:@"select * from DWHUserPropertiesModel where uid = '%@'",uid]];
-        NSArray *arrayId = [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId from DWHUserPropertiesModel where uid = '%@'",uid]];
-        NSMutableArray *deleteId = [[NSMutableArray alloc] init];
-        for(DWHEventId *eventId in arrayId){
-            [deleteId addObject:eventId.autoIncrementId];
-        }
-        NSMutableDictionary *para = [[NSMutableDictionary alloc] init];
-        NSString *auth = @"";
-        for (DWHUserPropertiesModel *pName in properties) {
-            NSDictionary *dic =   [pName.columnValue toDictionary];
-            if (pName.auth) {
-                auth = pName.auth;
-            }
-            if (dic && dic[pName.columnName]) {
-                [para setValue:dic[pName.columnName] forKey:pName.columnName];
-            }
-        }
-        if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
-            NSLog(@"DWHSDK ----------> info log 上传 User properties:%@",para);
-        }
-        [HWClient putToPath:@"v1/user" withParameters:para auth:auth completeBlock:^(BOOL success, id result) {
-            if (success) {
-                [DWHUserPropertiesModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
-                    [db dWHExecDelete:[NSString stringWithFormat:@"delete from DWHUserPropertiesModel where autoIncrementId in (%@)",[deleteId componentsJoinedByString:@","]]];
-                }];
-                if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
-                    NSLog(@"DWHSDK ----------> info log  User properties 更新成功");
-                }
-            }else{
-                if (DWHSDKLogLevelWarning >= self.dwhLogLevel) {
-                    NSLog(@"DWHSDK ----------> warning log  User properties 更新失败");
-                }
-                if([result intValue] >= 500){
-                    self.failureCount = self.failureCount +1;
-                }
-                if([result intValue] == 404 || [result intValue] == 410){
-                    self.failureCount = self.failureCount +1;
-                }
-                if (self.failureCount > 3) {
-                    [[NSUserDefaults standardUserDefaults] setValue:@"1" forKey:[NSString stringWithFormat:@"%@%@",StopUsingDataWarehouse,[[NSBundle mainBundle].infoDictionary objectForKey:@"CFBundleShortVersionString"]]];
-                }
-            }
-            [self delayCheckToUploadUserPropertiesToServer];
-            if (!success && [result integerValue] == 401) {
-                [self handleHTTP401Error:auth];
-            }
-        }];
-    }else{
-        [self delayCheckToUploadUserPropertiesToServer];
-    }
-}
-- (void)delayCheckToUploadUserPropertiesToServer{
-    if(self.isStopUsingDataWarehouse){
-        return ;
-    }
-    __block __weak DWHSDK *weakSelf = self;
-    [_backgroundQueue addOperationWithBlock:^{
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [NSObject cancelPreviousPerformRequestsWithTarget:weakSelf selector:@selector(checkToUploadUserPropertiesToServer) object:nil];
-            [weakSelf performSelector:@selector(checkToUploadUserPropertiesToServer) withObject:nil afterDelay:5];
-        });
-    }];
-}
 
 - (void)logEvent:(NSString *)eventName {
     [self logEvent:eventName withEventProperties:@{}];
 }
-
-- (void)logEvent:(NSString *)eventName withEventProperties:(NSDictionary *)attributes{
+- (void)logEvent:(NSString *)eventName  withEventProperties:(NSDictionary * _Nullable)attributes andUserProperties:( NSDictionary * _Nullable)userSpecialProperties{
     if(self.isStopUsingDataWarehouse){
         return ;
     }
     DWHEventModel *event = [[DWHEventModel alloc] init];
     event.eventName = eventName;
     if (self.serverStandardTime == 0) {
-         event.at = -1;
+        event.at = -1;
     }else{
         long long seconds = [[NSProcessInfo processInfo] systemUptime]-self.appStartTime;
         if (self.serverStandardTime > 100000000000) {
@@ -323,35 +200,64 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         }
         event.at = self.serverStandardTime+seconds;
     }
-   
+    
     event.auth = self.auth;
-    event.device_id = [DWHSDK device_id];
-    event.keychain_id = [DWHSDK keychain_id];
+    event.device_id = [DWHSDK keychain_id];
+    
+    NSMutableDictionary *userAttribute = [[NSMutableDictionary alloc] init];
+    if (userSpecialProperties) {
+        [userAttribute addEntriesFromDictionary:userSpecialProperties];
+    }
+    //外部传入uid 或者user_id
     if(self.userProperties[@"uid"]){
         event.uid = [NSString stringWithFormat:@"%@",self.userProperties[@"uid"]];
     }
-    if(self.userProperties[@"birthday"]){
-        event.birthday = [NSString stringWithFormat:@"%@",self.userProperties[@"birthday"]];
+    if(self.userProperties[@"user_id"]){
+        event.uid = [NSString stringWithFormat:@"%@",self.userProperties[@"user_id"]];
     }
+    
+    if(self.userProperties[@"age"]){
+        [userAttribute setValue:[NSString stringWithFormat:@"%i",[self.userProperties[@"age"] intValue]] forKey:@"age"];
+    }
+    
     if(self.userProperties[@"gender"]){
-        event.gender = [NSString stringWithFormat:@"%@",self.userProperties[@"gender"]];
+        [userAttribute setValue:[[NSString stringWithFormat:@"%@",self.userProperties[@"gender"]] uppercaseString] forKey:@"gender"];
     }
-    if(self.userProperties[@"nation"]){
-        event.nation = [NSString stringWithFormat:@"%@",self.userProperties[@"nation"]];
+  
+    if(self.userProperties[@"country"]){
+        [userAttribute setValue:[NSString stringWithFormat:@"%@",self.userProperties[@"country"]] forKey:@"country"];
     }
-    if(self.userProperties[@"app_verison"]){
-        event.app_verison = [NSString stringWithFormat:@"%@",self.userProperties[@"app_verison"]];
-    }else{
-        event.app_verison = [NSString stringWithFormat:@"%@",[DWHSDK clientVersion]];
+    if(self.userProperties[@"region"]){
+        [userAttribute setValue:[NSString stringWithFormat:@"%@",self.userProperties[@"region"]] forKey:@"region"];
     }
-    if(self.userProperties[@"ban_status"]){
-        event.ban_status = [NSString stringWithFormat:@"%@",self.userProperties[@"ban_status"]];
+    if (self.userProperties[@"city"]) {
+        [userAttribute setValue:[NSString stringWithFormat:@"%@",self.userProperties[@"city"]] forKey:@"city"];
+    }
+    [userAttribute setValue:[NSString stringWithFormat:@"%@",[DWHSDK clientVersion]] forKey:@"app_version"];
+    
+    if(self.userProperties[@"rvc_ban_status"]){
+        [userAttribute setValue:[NSString stringWithFormat:@"%@",self.userProperties[@"rvc_ban_status"]] forKey:@"rvc_ban_status"];
     }
     if(self.userProperties[@"longitude"]){
-        event.longitude = [NSString stringWithFormat:@"%@",self.userProperties[@"longitude"]];
+        [userAttribute setValue:[NSString stringWithFormat:@"%@",self.userProperties[@"longitude"]] forKey:@"longitude"];
     }
     if(self.userProperties[@"latitude"]){
-        event.latitude = [NSString stringWithFormat:@"%@",self.userProperties[@"latitude"]];
+        [userAttribute setValue:[NSString stringWithFormat:@"%@",self.userProperties[@"latitude"]] forKey:@"latitude"];
+    }
+   
+    [userAttribute setValue:[NSString stringWithFormat:@"%i",UserTimeZoneToUTC()] forKey:@"time_zone"];
+    [userAttribute setValue:[DWHSDK sdkVersion] forKey:@"sdk_version"];
+    [userAttribute setValue:[NSString stringWithFormat:@"%@",[[UIDevice currentDevice] systemVersion]] forKey:@"os_version"];
+    [userAttribute setValue:@"iOS" forKey:@"os"];
+    [userAttribute setValue:[NSString stringWithFormat:@"%@",[DWHSDKTool userDeviceName]] forKey:@"device"];
+    [userAttribute setValue:[NSString stringWithFormat:@"%@",[DWHSDK idfa]] forKey:@"idfa"];
+    [userAttribute setValue:[NSString stringWithFormat:@"%@",[[UIDevice currentDevice] identifierForVendor].UUIDString] forKey:@"idfv"];
+    [userAttribute setValue:[NSString stringWithFormat:@"%@",[DWHSDK sdkVersion]] forKey:@"sdk_version"];
+    [userAttribute setValue:[NSString stringWithFormat:@"%@",[DWHSDK keychain_id]] forKey:@"device_id"];
+    NSString *preferredLanguage = [[NSLocale preferredLanguages] firstObject];
+    if (preferredLanguage.length >= 2) {
+        NSString *lan = [preferredLanguage substringToIndex:2];
+        [userAttribute setValue:[NSString stringWithFormat:@"%@",lan] forKey:@"device_lang"];
     }
     
     if (!self.currentSessionId.length) {
@@ -361,7 +267,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     if (!attributes) {
         attributes = @{};
     }
-    
+    event.userProperties = [userAttribute toJSonString];
     event.attributes = [attributes toJSonString];
     __block __weak DWHSDK *weakSelf = self;
     [self runOnBackgroundQueue:^{
@@ -377,6 +283,9 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
             }
         }
     }];
+}
+- (void)logEvent:(NSString *)eventName withEventProperties:(NSDictionary *)attributes{
+    [self logEvent:eventName withEventProperties:attributes andUserProperties:nil];
 }
 
 /**
@@ -498,51 +407,25 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     NSMutableArray *uploadArr = [[NSMutableArray alloc] init];
     for (DWHEventModel *model in arr) {
         NSMutableDictionary *uploadPar = [[NSMutableDictionary alloc] init];
-        [uploadPar setValue:model.eventName forKey:@"eventName"];
+        [uploadPar setValue:model.eventName forKey:@"event"];
+        [uploadPar setValue:@(model.at) forKey:@"event_ts"];
+        [uploadPar setValue:@"client" forKey:@"log_source"];
+        [uploadPar setValue:[NSString stringWithFormat:@"%li",(long)self.projectID] forKey:@"app_id"];
+        [uploadPar setValue:[DWHSDK data_version] forKey:@"data_version"];
+        [uploadArr setValue:[NSString stringWithFormat:@"%@",model.session_id] forKey:@"session_id"];
+        [uploadPar setValue:[NSString stringWithFormat:@"%@",model.uid] forKey:@"user_id"];
+        long long seconds = [[NSProcessInfo processInfo] systemUptime]-self.appStartTime;
+        if (self.serverStandardTime > 100000000000) {
+            seconds = ([[NSProcessInfo processInfo] systemUptime]-self.appStartTime)*1000;
+        }
+        long long upload_ts = self.serverStandardTime+seconds;
+        [uploadPar setValue:@(upload_ts) forKey:@"event_upload_ts"];
+        
         NSDictionary *dic = [model.attributes toDictionary];
         [uploadPar setValue:dic forKey:@"attributes"];
-        [uploadPar setValue:@(model.at) forKey:@"at"];
         
-        NSMutableDictionary *common = [[NSMutableDictionary alloc] init];
-        if(model.uid.length){
-            [common setValue:model.uid forKey:@"uid"];
-        }
-        [common setValue:@"iOS" forKey:@"platform"];
-        if(model.birthday.length){
-            [common setValue:model.birthday forKey:@"birthday"];
-        }
-        if(model.gender.length){
-            [common setValue:model.gender forKey:@"gender"];
-        }
-        if(model.nation.length){
-            [common setValue:model.nation forKey:@"nation"];
-        }
-        if(model.app_verison.length){
-            [common setValue:model.app_verison forKey:@"app_verison"];
-        }
-        if(model.ban_status.length){
-            [common setValue:model.ban_status forKey:@"ban_status"];
-        }
-        if(model.longitude.length){
-            [common setValue:model.longitude forKey:@"longitude"];
-        }
-        if(model.latitude.length){
-            [common setValue:model.latitude forKey:@"latitude"];
-        }
-        if(model.keychain_id.length){
-            [common setValue:model.keychain_id forKey:@"keychain_id"];
-        }else{
-            [common setValue:[DWHSDK keychain_id]forKey:@"keychain_id"];
-        }
-        if(model.device_id.length){
-             [common setValue:model.device_id forKey:@"device_id"];
-        }else{
-            [common setValue:[DWHSDK device_id] forKey:@"device_id"];
-        }
-        if(model.session_id.length){
-            [common setValue:model.session_id forKey:@"session_id"];
-        }
-        [uploadPar setValue:common forKey:@"user_properties"];
+        NSDictionary *att = [model.userProperties toDictionary];
+        [uploadPar setValue:att forKey:@"user_properties"];
         [uploadArr addObject:uploadPar];
     }
     return uploadArr;
@@ -558,7 +441,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
         NSLog(@"DWHSDK ----------> info log 上传打点:%@",@{@"events":events});
     }
-    [HWClient postToPath:@"v1/event" withParameters:@{@"events":events} auth:auth completeBlock:^(BOOL success, id result) {
+    [HWClient postToPath:@"v2/event" withParameters:@{@"events":events} auth:auth completeBlock:^(BOOL success, id result) {
         self.isUploadingEventNow = FALSE;
         if (self.showLog) {
             //             NSLog(@"DWH 上传结果:%i",success);
@@ -593,10 +476,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
         [db dWHExecUpdate:[NSString stringWithFormat:@"update DWHEventModel set auth ='' where auth ='%@' ",auth]];
     }];
-    [DWHUserPropertiesModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
-        [db dWHExecUpdate:[NSString stringWithFormat:@"update DWHUserPropertiesModel set auth ='' where auth =  '%@'",auth]];
-    }];
-    [self setUserId:self.userId withProperties:self.userProperties];
+    [self setUserId:self.userId withProperties:self.userProperties andToken:auth];
     if (DWHSDKLogLevelError >= self.dwhLogLevel) {
         NSLog(@"DWHSDK ----------> error log 打点上传发生401错误,重置auth");
     }
@@ -612,12 +492,18 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }
     return resuslt;
 }
-+ (NSString *)sdkVersion{
-    return @"0.69";
+
++ (NSString *)idfa{
+    BOOL on = [[ASIdentifierManager sharedManager] isAdvertisingTrackingEnabled];
+    NSString *uuidString = @"";
+    if (on) {
+        uuidString =  [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
+    }
+    return uuidString;
 }
 + (NSString *)device_id{
     BOOL on = [[ASIdentifierManager sharedManager] isAdvertisingTrackingEnabled];
-   NSString *uuidString = @"";
+    NSString *uuidString = @"";
     if (on) {
         uuidString =  [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     }
@@ -682,5 +568,11 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         return version;
     }
     return @"0.0.0";
+}
++ (NSString *)data_version{
+    return @"1.0";
+}
++ (NSString *)sdkVersion{
+    return @"1.0";
 }
 @end

@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 
-static BOOL showsql =  true;
+static BOOL showsql =  FALSE;
 @interface DWHORMDB : NSObject
 
 /**

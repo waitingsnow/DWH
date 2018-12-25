@@ -55,24 +55,33 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 - (void)setLogLevel:(DWHSDKLogLevel)logLevel{
     self.dwhLogLevel = logLevel;
 }
+- (void)appDidFinishLaunch{
+    self.appStartTime = [[NSProcessInfo processInfo] systemUptime];
+}
 - (void)setServerTime:(long long)serverTime{
     self.serverStandardTime = serverTime;
     self.appStartTime = [[NSProcessInfo processInfo] systemUptime];
     if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
         NSLog(@"DWHSDK ----------> 设置服务器时间:%lld",self.serverStandardTime);
     }
-    [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
-        [db dWHExecDelete:[NSString stringWithFormat:@"update  DWHEventModel set at = %lld where at = -1",serverTime]];
-    }];
+    NSArray *arr =   [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId,at from DWHEventModel  where fullTime = 0"]];
+    for (DWHEventId * model in arr) {
+        long long time = [[NSProcessInfo processInfo] systemUptime]*1000 - model.at;
+        if (time < 0) {
+            time = 0;
+        }
+        [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
+            [db dWHExecUpdate:[NSString stringWithFormat:@"update  DWHEventModel set at = %lld,fullTime = 1 where autoIncrementId = %@",self.serverStandardTime-time,model.autoIncrementId]];
+        }];
+    }
 }
 - (void)initializeProjectId:(NSInteger )projectId isProductionEnv:(BOOL)isProduction{
     self.projectID = projectId;
     self.auth = @"";
     [HWClient setEnv:isProduction];
     self.showLog = !isProduction;
-    
     NSString *dbPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)lastObject];
-    dbPath = [dbPath stringByAppendingPathComponent:@"/dwh2.db"];
+    dbPath = [dbPath stringByAppendingPathComponent:@"/dwh5.db"];
     [DWHORMDB configDBPath:dbPath showLog:self.showLog];
     [DWHEventModel dWHCreateTable];
 }
@@ -129,7 +138,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         [self runOnBackgroundQueue:^{
             [self checkToUploadEvent];
         }];
-        
+    
     }else {
         [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkToUploadEvent) object:nil];
         self.auth = @"";
@@ -145,15 +154,14 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         self.currentSessionId = [DWHSDK randomUUID];
         self.dwhLogLevel = DWHSDKLogLevelNone;
         self.appStartTime = (long long)[[NSProcessInfo processInfo] systemUptime];
-        NSLog(@"DWH-------------------->sessionid:%@ start time:%lld",self.currentSessionId,self.appStartTime);
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillResignActive)
-                                                     name:UIApplicationWillEnterForegroundNotification object:nil];
     }
     return self;
 }
-- (void)applicationWillResignActive{
-    self.currentSessionId = [DWHSDK randomUUID];
-    NSLog(@"DWH-------------------->new sessionid:%@",self.currentSessionId);
+
+- (void)generateNewSessionId{
+    [self runOnBackgroundQueue:^{
+        self.currentSessionId = [DWHSDK randomUUID];
+    }];
 }
 - (BOOL)runOnBackgroundQueue:(void (^)(void))block{
     if ([[NSOperationQueue currentQueue].name isEqualToString:BACKGROUND_QUEUE_NAME]) {
@@ -191,13 +199,14 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }
     DWHEventModel *event = [[DWHEventModel alloc] init];
     event.eventName = eventName;
+    event.occurTime = [[NSProcessInfo processInfo] systemUptime];
     if (self.serverStandardTime == 0) {
-        event.at = -1;
+        event.at =  [[NSProcessInfo processInfo] systemUptime]*1000;
+        event.fullTime = 0;
     }else{
-        long long seconds = [[NSProcessInfo processInfo] systemUptime]-self.appStartTime;
-        if (self.serverStandardTime > 100000000000) {
-            seconds = ([[NSProcessInfo processInfo] systemUptime]-self.appStartTime)*1000;
-        }
+        long long seconds  = ([[NSProcessInfo processInfo] systemUptime]-self.appStartTime)*1000;
+        
+        event.fullTime = 1;
         event.at = self.serverStandardTime+seconds;
     }
     
@@ -298,14 +307,14 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     if (self.isUploadingEventNow) {
         return;
     }
-    NSMutableDictionary * dic = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where auth is not null and trim(auth) !=''  and at != -1 order by autoIncrementId desc  limit 1 OFFSET 1"];
+    NSMutableDictionary * dic = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where auth is not null and trim(auth) !=''  and fullTime = 1 order by autoIncrementId desc  limit 1 OFFSET 1"];
     
     if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
         NSLog(@"DWHSDK ----------> info log 5秒轮询 未上传的event");
     }
     if (dic && dic[@"at"]) {
         long long  at = [dic[@"at"] longLongValue];
-        if (llabs([self curentTime] - at) >= (30 * ((at > 100000000000)?1000:1))) {
+        if (llabs([self curentTime] - at) >= 30*1000) {
             if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
                 NSLog(@"DWHSDK ----------> info log 有超过30秒未上传的event");
             }
@@ -322,7 +331,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         }
     }
     
-    NSMutableDictionary * countDic = [DWHEventModel dWHQueryForDictionary:@"select count(*) as count from DWHEventModel where auth is not null and trim(auth) !='' and at != -1"];
+    NSMutableDictionary * countDic = [DWHEventModel dWHQueryForDictionary:@"select count(*) as count from DWHEventModel where auth is not null and trim(auth) !='' and fullTime = 1"];
     if (self.showLog) {
         //        NSLog(@"轮询检测event 10条 :%@",countDic);
     }
@@ -332,7 +341,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
             if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
                 NSLog(@"DWHSDK ----------> info log 有超过10条未上传的event");
             }
-            NSMutableDictionary * authDic = [DWHEventModel dWHQueryForDictionary:@"select auth from DWHEventModel where auth is not null and trim(auth) !='' and at != -1  limit 1"];
+            NSMutableDictionary * authDic = [DWHEventModel dWHQueryForDictionary:@"select auth from DWHEventModel where auth is not null and trim(auth) !='' and fullTime = 1  limit 1"];
             //            NSLog(@"authDic:%@",authDic);
             if (authDic && authDic[@"auth"]) {
                 NSString *auth = [NSString stringWithFormat:@"%@",authDic[@"auth"]];
@@ -350,13 +359,13 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         }
     }
     
-    NSMutableDictionary * lastOne = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where auth is not null and trim(auth) !='' and at != -1 order by autoIncrementId desc  limit 1"];
+    NSMutableDictionary * lastOne = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where auth is not null and trim(auth) !='' and fullTime = 1 order by autoIncrementId desc  limit 1"];
     if (self.showLog) {
         //        NSLog(@"轮询检测event 最后一条 :%@",lastOne);
     }
     if (lastOne && lastOne[@"at"]) {
         long long  at = [lastOne[@"at"] longLongValue];
-        if (llabs([self curentTime] - at) >= (30 * ((at > 100000000000)?1000:1))) {
+        if (llabs([self curentTime] - at) >= 30*1000) {
             if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
                 NSLog(@"DWHSDK ----------> info log 有超过30秒未上传的打点");
             }
@@ -395,7 +404,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }];
 }
 - (NSArray *)getEventIdByAuth:(NSString *)auth{
-    NSArray *arr =   [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId from DWHEventModel where auth = '%@' limit 10",auth]];
+    NSArray *arr =   [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId from DWHEventModel where auth = '%@' and fullTime = 1  limit 10",auth]];
     NSMutableArray *uploadArr = [[NSMutableArray alloc] init];
     for(DWHEventId *eventId in arr){
         [uploadArr addObject:eventId.autoIncrementId];
@@ -403,23 +412,27 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     return uploadArr.copy;
 }
 - (NSMutableArray *)getEventByAuth:(NSString *)auth{
-    NSArray *arr = [DWHEventModel dWHQueryForObjectArray:[NSString stringWithFormat:@"select * from DWHEventModel where auth = '%@' limit 10",auth]];
+    NSArray *arr = [DWHEventModel dWHQueryForObjectArray:[NSString stringWithFormat:@"select * from DWHEventModel where auth = '%@' and fullTime = 1 limit 10",auth]];
     NSMutableArray *uploadArr = [[NSMutableArray alloc] init];
     for (DWHEventModel *model in arr) {
+        NSLog(@"model:%@",model.session_id);
         NSMutableDictionary *uploadPar = [[NSMutableDictionary alloc] init];
         [uploadPar setValue:model.eventName forKey:@"event"];
         [uploadPar setValue:@(model.at) forKey:@"event_ts"];
         [uploadPar setValue:@"client" forKey:@"log_source"];
         [uploadPar setValue:[NSString stringWithFormat:@"%li",(long)self.projectID] forKey:@"app_id"];
         [uploadPar setValue:[DWHSDK data_version] forKey:@"data_version"];
-        [uploadArr setValue:[NSString stringWithFormat:@"%@",model.session_id] forKey:@"session_id"];
+        [uploadPar setValue:[NSString stringWithFormat:@"%@",model.session_id] forKey:@"session_id"];
         [uploadPar setValue:[NSString stringWithFormat:@"%@",model.uid] forKey:@"user_id"];
-        long long seconds = [[NSProcessInfo processInfo] systemUptime]-self.appStartTime;
-        if (self.serverStandardTime > 100000000000) {
-            seconds = ([[NSProcessInfo processInfo] systemUptime]-self.appStartTime)*1000;
+        if (self.serverStandardTime > 0) {
+            long long seconds =([[NSProcessInfo processInfo] systemUptime]-self.appStartTime)*1000;
+            long long upload_ts = self.serverStandardTime+seconds;
+            [uploadPar setValue:@(upload_ts) forKey:@"event_upload_ts"];
+        }else{
+            long long seconds = ([[NSProcessInfo processInfo] systemUptime] - model.occurTime)*1000;
+            long long upload_ts = model.at+seconds;
+            [uploadPar setValue:@(upload_ts) forKey:@"event_upload_ts"];
         }
-        long long upload_ts = self.serverStandardTime+seconds;
-        [uploadPar setValue:@(upload_ts) forKey:@"event_upload_ts"];
         
         NSDictionary *dic = [model.attributes toDictionary];
         [uploadPar setValue:dic forKey:@"attributes"];
@@ -428,6 +441,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         [uploadPar setValue:att forKey:@"user_properties"];
         [uploadArr addObject:uploadPar];
     }
+    NSLog(@"uploadArr:%@",uploadArr);
     return uploadArr;
 }
 - (void)uploadEventToServer:(NSArray *)events auth:(NSString *)auth completeBlock:(UploadCompleteBlock)block{
@@ -483,7 +497,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 }
 
 - (long long)curentTime{
-    return  [[NSDate date] timeIntervalSince1970]*((self.serverStandardTime>100000000000)?1000:1);
+    return  [[NSDate date] timeIntervalSince1970]*1000;
 }
 - (BOOL)isStopUsingDataWarehouse{
     BOOL resuslt =  [[NSUserDefaults standardUserDefaults] valueForKey:[NSString stringWithFormat:@"%@%@",StopUsingDataWarehouse,[[NSBundle mainBundle].infoDictionary objectForKey:@"CFBundleShortVersionString"]]]!=nil;
@@ -573,6 +587,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     return @"1.0";
 }
 + (NSString *)sdkVersion{
-    return @"1.0";
+    return @"1.1.3";
 }
 @end

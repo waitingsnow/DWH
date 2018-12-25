@@ -45,7 +45,14 @@ typedef enum : NSUInteger {
  增量 更新 userProperties
  */
 - (void)updateUserProperties:(NSDictionary *)userProperties;
-
+/**
+ app 进入前台
+ **/
+- (void)generateNewSessionId;
+/**
+ app 启动，设置一个初始化的启动时间，处理没有设置服务器时间就打点的情况
+ **/
+- (void)appDidFinishLaunch;
 /*
  打点
  */

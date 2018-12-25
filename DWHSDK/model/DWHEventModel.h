@@ -20,4 +20,6 @@
 @property (nonatomic, copy) NSString *uid;
 @property (nonatomic, copy) NSString *account_create_ts;
 @property (nonatomic, copy) NSString *userProperties;
+@property (nonatomic, assign) int fullTime;
+@property (nonatomic, assign) long long occurTime;
 @end

@@ -10,4 +10,5 @@
 
 @interface DWHEventId : NSObject
 @property (nonatomic, copy) NSString *autoIncrementId;
+@property (nonatomic, assign) long long at;
 @end

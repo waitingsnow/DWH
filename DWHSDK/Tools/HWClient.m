@@ -25,6 +25,7 @@ static NSString *apiUrl = @"";
 + (void)postToPath:(NSString *)path withParameters:(NSDictionary *)parameters auth:(NSString *)auth completeBlock:(EXUCompleteBlock)complete{
     [self requestServer:path withParameters:parameters auth:auth method:@"POST" completeBlock:complete];
 }
+
 +(void)requestServer:(NSString *)path withParameters:(NSDictionary *)parameters auth:(NSString *)auth method:(NSString *)method completeBlock:(EXUCompleteBlock)complete{
     
     NSURLSession *session = [NSURLSession sharedSession];
@@ -44,6 +45,7 @@ static NSString *apiUrl = @"";
             [request setHTTPBody:jsonData];
         }
     }
+  
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         if (error) {
             [self handleResponse:error complete:complete];

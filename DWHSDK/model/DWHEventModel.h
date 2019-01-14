@@ -22,4 +22,5 @@
 @property (nonatomic, copy) NSString *userProperties;
 @property (nonatomic, assign) int fullTime;
 @property (nonatomic, assign) long long occurTime;
+@property (nonatomic, assign) int autoGrowthID;
 @end

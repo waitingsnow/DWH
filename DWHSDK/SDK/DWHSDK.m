@@ -22,7 +22,42 @@
 typedef void (^UploadCompleteBlock)(BOOL success);
 static NSInteger minDelayUploadEvent  = 1;
 static NSInteger maxDelayUploadEvent  = 5;
-@interface DWHSDK()
+
+#ifndef weakify
+#if DEBUG
+#if __has_feature(objc_arc)
+#define weakify(object) autoreleasepool{} __weak __typeof__(object) weak##_##object = object;
+#else
+#define weakify(object) autoreleasepool{} __block __typeof__(object) block##_##object = object;
+#endif
+#else
+#if __has_feature(objc_arc)
+#define weakify(object) try{} @finally{} {} __weak __typeof__(object) weak##_##object = object;
+#else
+#define weakify(object) try{} @finally{} {} __block __typeof__(object) block##_##object = object;
+#endif
+#endif
+#endif
+
+#ifndef strongify
+#if DEBUG
+#if __has_feature(objc_arc)
+#define strongify(object) autoreleasepool{} __typeof__(object) object = weak##_##object;
+#else
+#define strongify(object) autoreleasepool{} __typeof__(object) object = block##_##object;
+#endif
+#else
+#if __has_feature(objc_arc)
+#define strongify(object) try{} @finally{} __typeof__(object) object = weak##_##object;
+#else
+#define strongify(object) try{} @finally{} __typeof__(object) object = block##_##object;
+#endif
+#endif
+#endif
+
+@interface DWHSDK(){
+     UIBackgroundTaskIdentifier _backgroundTaskIdentifier;
+}
 
 @property (nonatomic, strong) NSMutableDictionary *userProperties;
 @property (nonatomic, strong) NSOperationQueue *backgroundQueue;
@@ -38,6 +73,9 @@ static NSInteger maxDelayUploadEvent  = 5;
 @property (nonatomic, assign) DWHSDKLogLevel dwhLogLevel;
 @property (nonatomic, assign) long long appStartTime;
 @property (nonatomic, assign) long long serverStandardTime;
+
+@property (nonatomic, assign) int autoGrowthId;
+@property (nonatomic, assign) NSInteger maxUploadTime;
 @end
 
 static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
@@ -81,7 +119,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     [HWClient setEnv:isProduction];
     self.showLog = !isProduction;
     NSString *dbPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)lastObject];
-    dbPath = [dbPath stringByAppendingPathComponent:@"/dwh5.db"];
+    dbPath = [dbPath stringByAppendingPathComponent:@"/dwh7.db"];
     [DWHORMDB configDBPath:dbPath showLog:self.showLog];
     [DWHEventModel dWHCreateTable];
 }
@@ -148,20 +186,46 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 - (instancetype)init{
     self = [super init];
     if (self) {
+        self.maxUploadTime = 30;
         _backgroundQueue = [[NSOperationQueue alloc] init];
         [_backgroundQueue setMaxConcurrentOperationCount:1];
         _backgroundQueue.name = BACKGROUND_QUEUE_NAME;
         self.currentSessionId = [DWHSDK randomUUID];
+        self.autoGrowthId = 1;
         self.dwhLogLevel = DWHSDKLogLevelNone;
         self.appStartTime = (long long)[[NSProcessInfo processInfo] systemUptime];
+        _backgroundTaskIdentifier = UIBackgroundTaskInvalid;
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:)
+                                                     name:UIApplicationDidBecomeActiveNotification object:nil];
     }
     return self;
 }
 
 - (void)generateNewSessionId{
+    
+    if (!self.isStopUsingDataWarehouse) {
+        if (_backgroundTaskIdentifier == UIBackgroundTaskInvalid){
+            UIApplication *application = [UIApplication sharedApplication];
+            @weakify(self);
+            _backgroundTaskIdentifier = [application beginBackgroundTaskWithExpirationHandler:^{
+                @strongify(self);
+                [self endBackgroundTask];
+            }];
+        }
+        //等1秒开始检测未上传的打点，保证session end点都打到了
+        [_backgroundQueue cancelAllOperations];
+        self.maxUploadTime = 0;
+        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(delayCheckToUploadEvent:) object:nil];
+        
+        NSTimeInterval remainingTime =  [[UIApplication sharedApplication] backgroundTimeRemaining];
+        [self performSelector:@selector(endBackgroundTask) withObject:nil afterDelay:MAX(remainingTime-0.1, 0)];
+    }
+    
     [self runOnBackgroundQueue:^{
         self.currentSessionId = [DWHSDK randomUUID];
+        [self delayCheckToUploadEvent:0];
     }];
+   
 }
 - (BOOL)runOnBackgroundQueue:(void (^)(void))block{
     if ([[NSOperationQueue currentQueue].name isEqualToString:BACKGROUND_QUEUE_NAME]) {
@@ -209,7 +273,11 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         event.fullTime = 1;
         event.at = self.serverStandardTime+seconds;
     }
-    
+    if (self.autoGrowthId > 500) {
+        self.autoGrowthId = 1;
+    }
+    event.autoGrowthID = self.autoGrowthId;
+    self.autoGrowthId = self.autoGrowthId + 1;
     event.auth = self.auth;
     event.device_id = [DWHSDK keychain_id];
     
@@ -314,7 +382,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }
     if (dic && dic[@"at"]) {
         long long  at = [dic[@"at"] longLongValue];
-        if (llabs([self curentTime] - at) >= 30*1000) {
+        if (llabs([self curentTime] - at) >= self.maxUploadTime*1000) {
             if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
                 NSLog(@"DWHSDK ----------> info log 有超过30秒未上传的event");
             }
@@ -383,7 +451,20 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }
     [self delayCheckToUploadEvent:maxDelayUploadEvent];
 }
-- (void)delayCheckToUploadEvent:(NSInteger)delay{
+- (void)applicationDidBecomeActive:(NSNotification *)notification{
+    [self endBackgroundTask];
+    self.maxUploadTime = 30;
+}
+- (void)endBackgroundTask{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(endBackgroundTask) object:nil];
+     UIApplication *application = [UIApplication sharedApplication];
+    if (_backgroundTaskIdentifier != UIBackgroundTaskInvalid) {
+        [application endBackgroundTask:_backgroundTaskIdentifier];
+        _backgroundTaskIdentifier = UIBackgroundTaskInvalid;
+    }
+}
+
+- (void)delayCheckToUploadEvent:(NSTimeInterval)delay{
     if(self.isStopUsingDataWarehouse){
         return ;
     }
@@ -415,11 +496,12 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     NSArray *arr = [DWHEventModel dWHQueryForObjectArray:[NSString stringWithFormat:@"select * from DWHEventModel where auth = '%@' and fullTime = 1 limit 10",auth]];
     NSMutableArray *uploadArr = [[NSMutableArray alloc] init];
     for (DWHEventModel *model in arr) {
-        NSLog(@"model:%@",model.session_id);
+//        NSLog(@"model:%@",model.session_id);
         NSMutableDictionary *uploadPar = [[NSMutableDictionary alloc] init];
         [uploadPar setValue:model.eventName forKey:@"event"];
         [uploadPar setValue:@(model.at) forKey:@"event_ts"];
         [uploadPar setValue:@"client" forKey:@"log_source"];
+        [uploadPar setValue:@(model.autoGrowthID) forKey:@"loop_id"];
         [uploadPar setValue:[NSString stringWithFormat:@"%li",(long)self.projectID] forKey:@"app_id"];
         [uploadPar setValue:[DWHSDK data_version] forKey:@"data_version"];
         [uploadPar setValue:[NSString stringWithFormat:@"%@",model.session_id] forKey:@"session_id"];
@@ -441,9 +523,10 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         [uploadPar setValue:att forKey:@"user_properties"];
         [uploadArr addObject:uploadPar];
     }
-    NSLog(@"uploadArr:%@",uploadArr);
+//    NSLog(@"uploadArr:%@",uploadArr);
     return uploadArr;
 }
+
 - (void)uploadEventToServer:(NSArray *)events auth:(NSString *)auth completeBlock:(UploadCompleteBlock)block{
     if (!events || events.count == 0 || !auth || !auth.length ) {
         if (block) {
@@ -452,9 +535,9 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         return ;
     }
     self.isUploadingEventNow = YES;
-    if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
-        NSLog(@"DWHSDK ----------> info log 上传打点:%@",@{@"events":events});
-    }
+//    if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
+//        NSLog(@"DWHSDK ----------> info log 上传打点:%@",@{@"events":events});
+//    }
     [HWClient postToPath:@"v2/event" withParameters:@{@"events":events} auth:auth completeBlock:^(BOOL success, id result) {
         self.isUploadingEventNow = FALSE;
         if (self.showLog) {
@@ -587,6 +670,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     return @"1.0";
 }
 + (NSString *)sdkVersion{
-    return @"1.1.3";
+    return @"1.1.7";
 }
 @end

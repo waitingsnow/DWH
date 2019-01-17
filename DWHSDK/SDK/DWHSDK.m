@@ -186,6 +186,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 - (instancetype)init{
     self = [super init];
     if (self) {
+        self.failureCount = 0;
         self.maxUploadTime = 30;
         _backgroundQueue = [[NSOperationQueue alloc] init];
         [_backgroundQueue setMaxConcurrentOperationCount:1];
@@ -400,9 +401,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }
     
     NSMutableDictionary * countDic = [DWHEventModel dWHQueryForDictionary:@"select count(*) as count from DWHEventModel where auth is not null and trim(auth) !='' and fullTime = 1"];
-    if (self.showLog) {
-        //        NSLog(@"轮询检测event 10条 :%@",countDic);
-    }
     if (countDic && countDic[@"count"]) {
         int rowCount = [countDic[@"count"] intValue];
         if (rowCount >= 10) {
@@ -428,9 +426,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }
     
     NSMutableDictionary * lastOne = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where auth is not null and trim(auth) !='' and fullTime = 1 order by autoIncrementId desc  limit 1"];
-    if (self.showLog) {
-        //        NSLog(@"轮询检测event 最后一条 :%@",lastOne);
-    }
     if (lastOne && lastOne[@"at"]) {
         long long  at = [lastOne[@"at"] longLongValue];
         if (llabs([self curentTime] - at) >= 30*1000) {
@@ -535,34 +530,16 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         return ;
     }
     self.isUploadingEventNow = YES;
-//    if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
-//        NSLog(@"DWHSDK ----------> info log 上传打点:%@",@{@"events":events});
-//    }
     [HWClient postToPath:@"v2/event" withParameters:@{@"events":events} auth:auth completeBlock:^(BOOL success, id result) {
         self.isUploadingEventNow = FALSE;
-        if (self.showLog) {
-            //             NSLog(@"DWH 上传结果:%i",success);
-        }
         if (block) {
             block(success);
         }
         if(!success && [result intValue] >= 500){
             self.failureCount = self.failureCount +1;
-            if (DWHSDKLogLevelError >= self.dwhLogLevel) {
-                NSLog(@"DWHSDK ----------> error log 打点上传发生500以上的错误:%@ 失败次数:%li",result,self.failureCount);
-            }
         }
         if((!success && [result intValue] == 404) || (!success && [result intValue] == 410)){
             self.failureCount = self.failureCount +1;
-            if (DWHSDKLogLevelError >= self.dwhLogLevel) {
-                NSLog(@"DWHSDK ----------> error log 打点上传发生410 404 的错误:%@ 失败次数:%li",result,self.failureCount);
-            }
-        }
-        if (self.failureCount > 3) {
-            [[NSUserDefaults standardUserDefaults] setValue:@"1" forKey:[NSString stringWithFormat:@"%@%@",StopUsingDataWarehouse,[[NSBundle mainBundle].infoDictionary objectForKey:@"CFBundleShortVersionString"]]];
-            if (DWHSDKLogLevelError >= self.dwhLogLevel) {
-                NSLog(@"DWHSDK ----------> error log DWH sdk 失败次数过多已经暂停访问");
-            }
         }
         if (!success && [result integerValue] == 401) {
             [self handleHTTP401Error:auth];
@@ -583,11 +560,10 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     return  [[NSDate date] timeIntervalSince1970]*1000;
 }
 - (BOOL)isStopUsingDataWarehouse{
-    BOOL resuslt =  [[NSUserDefaults standardUserDefaults] valueForKey:[NSString stringWithFormat:@"%@%@",StopUsingDataWarehouse,[[NSBundle mainBundle].infoDictionary objectForKey:@"CFBundleShortVersionString"]]]!=nil;
-    if (self.showLog && resuslt) {
+    if (self.showLog && self.failureCount>3) {
         NSLog(@"dwh 已经暂停");
     }
-    return resuslt;
+    return self.failureCount>3;
 }
 
 + (NSString *)idfa{
@@ -670,6 +646,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     return @"1.0";
 }
 + (NSString *)sdkVersion{
-    return @"1.1.7";
+    return @"1.2.9";
 }
 @end

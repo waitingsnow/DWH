@@ -20,7 +20,7 @@
 #import "NSData+DWHAdd.h"
 #import <UIKit/UIKit.h>
 typedef void (^UploadCompleteBlock)(BOOL success);
-static NSInteger minDelayUploadEvent  = 1;
+static NSInteger minDelayUploadEvent  = 3;
 static NSInteger maxDelayUploadEvent  = 5;
 
 #ifndef weakify
@@ -218,13 +218,20 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         self.maxUploadTime = 0;
         [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(delayCheckToUploadEvent:) object:nil];
         
-        NSTimeInterval remainingTime =  [[UIApplication sharedApplication] backgroundTimeRemaining];
-        [self performSelector:@selector(endBackgroundTask) withObject:nil afterDelay:MAX(remainingTime-0.1, 0)];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSTimeInterval remainingTime =  [[UIApplication sharedApplication] backgroundTimeRemaining];
+            [self performSelector:@selector(endBackgroundTask) withObject:nil afterDelay:MAX(remainingTime-0.1, 0)];
+        });
     }
     
     [self runOnBackgroundQueue:^{
         self.currentSessionId = [DWHSDK randomUUID];
-        [self delayCheckToUploadEvent:0];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSTimeInterval remainingTime =  [[UIApplication sharedApplication] backgroundTimeRemaining];
+            if(remainingTime>5){
+                [self delayCheckToUploadEvent:0];
+            }
+        });
     }];
    
 }
@@ -259,9 +266,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     [self logEvent:eventName withEventProperties:@{}];
 }
 - (void)logEvent:(NSString *)eventName  withEventProperties:(NSDictionary * _Nullable)attributes andUserProperties:( NSDictionary * _Nullable)userSpecialProperties{
-    if(self.isStopUsingDataWarehouse){
-        return ;
-    }
+    
     DWHEventModel *event = [[DWHEventModel alloc] init];
     event.eventName = eventName;
     event.occurTime = [[NSProcessInfo processInfo] systemUptime];
@@ -300,6 +305,9 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     
     if(self.userProperties[@"gender"]){
         [userAttribute setValue:[[NSString stringWithFormat:@"%@",self.userProperties[@"gender"]] uppercaseString] forKey:@"gender"];
+    }
+    if (self.userProperties[@"account_create_ts"]) {
+        [userAttribute setValue:[[NSString stringWithFormat:@"%@",self.userProperties[@"account_create_ts"]] uppercaseString] forKey:@"account_create_ts"];
     }
   
     if(self.userProperties[@"country"]){
@@ -376,7 +384,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     if (self.isUploadingEventNow) {
         return;
     }
-    NSMutableDictionary * dic = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where auth is not null and trim(auth) !=''  and fullTime = 1 order by autoIncrementId desc  limit 1 OFFSET 1"];
+    NSMutableDictionary * dic = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where auth is not null and trim(auth) !=''  and fullTime = 1 order by autoIncrementId   limit 1"];
     
     if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
         NSLog(@"DWHSDK ----------> info log 5秒轮询 未上传的event");
@@ -467,6 +475,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         return;
     }
     __block __weak DWHSDK *weakSelf = self;
+     [NSObject cancelPreviousPerformRequestsWithTarget:weakSelf selector:@selector(checkToUploadEvent) object:nil];
     [_backgroundQueue addOperationWithBlock:^{
         dispatch_async(dispatch_get_main_queue(), ^{
             [NSObject cancelPreviousPerformRequestsWithTarget:weakSelf selector:@selector(checkToUploadEvent) object:nil];
@@ -477,6 +486,11 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 - (void)clearEventById:(NSArray *)arrayId{
     [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
         [db dWHExecDelete:[NSString stringWithFormat:@"delete from DWHEventModel where autoIncrementId in (%@)",[arrayId componentsJoinedByString:@","]]];
+    }];
+    [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
+        for (NSString *aid in arrayId) {
+            [db dWHExecDelete:[NSString stringWithFormat:@"delete from DWHEventModel where autoIncrementId = '%@'",aid]];
+        }
     }];
 }
 - (NSArray *)getEventIdByAuth:(NSString *)auth{
@@ -646,6 +660,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     return @"1.0";
 }
 + (NSString *)sdkVersion{
-    return @"1.2.9";
+    return @"1.3.6";
 }
 @end

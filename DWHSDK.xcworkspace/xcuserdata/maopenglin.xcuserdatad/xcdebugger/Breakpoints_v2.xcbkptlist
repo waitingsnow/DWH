@@ -15,7 +15,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "261"
             endingLineNumber = "261"
-            landmarkName = "-logEvent:withEventProperties:andUserProperties:"
+            landmarkName = "-updateUserProperties:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

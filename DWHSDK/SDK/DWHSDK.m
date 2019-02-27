@@ -20,7 +20,7 @@
 #import "NSData+DWHAdd.h"
 #import <UIKit/UIKit.h>
 typedef void (^UploadCompleteBlock)(BOOL success);
-static NSInteger minDelayUploadEvent  = 3;
+static NSInteger minDelayUploadEvent  = 5;
 static NSInteger maxDelayUploadEvent  = 5;
 
 #ifndef weakify
@@ -214,7 +214,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
             }];
         }
         //等1秒开始检测未上传的打点，保证session end点都打到了
-        [_backgroundQueue cancelAllOperations];
+//        [_backgroundQueue cancelAllOperations];
         self.maxUploadTime = 0;
         [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(delayCheckToUploadEvent:) object:nil];
         
@@ -357,7 +357,11 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     event.attributes = [attributes toJSonString];
     __block __weak DWHSDK *weakSelf = self;
     [self runOnBackgroundQueue:^{
-        [event dWHSave:nil];
+        if (event.fullTime == 1) {
+             [event dWHSave:@[@"eventName",@"at"]];
+        }else{
+            [event dWHSave:nil];
+        }
         if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
             NSLog(@"DWHSDK ----------> info log %@",attributes);
         }
@@ -396,11 +400,14 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
                 NSLog(@"DWHSDK ----------> info log 有超过30秒未上传的event");
             }
             NSString *auth = [NSString stringWithFormat:@"%@",dic[@"auth"]];
-            NSMutableArray *uploadArr = [self getEventByAuth:auth];
+            NSArray *eventArr = [self getEventByAuth:auth];
+            NSMutableArray *uploadArr = [self getUploadEvent:eventArr];
             NSArray *arrId = [self getEventIdByAuth:auth];
             [self uploadEventToServer:uploadArr.copy auth:auth completeBlock:^(BOOL success) {
                 if (success) {
                     [self clearEventById:arrId];
+                    //服务器端存在相同事件点，根据上传点再次删除一次 看效果
+                    [self clearEventByEvent:eventArr];
                 }
                 [self delayCheckToUploadEvent:success?minDelayUploadEvent:maxDelayUploadEvent];
             }];
@@ -419,37 +426,19 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
             //            NSLog(@"authDic:%@",authDic);
             if (authDic && authDic[@"auth"]) {
                 NSString *auth = [NSString stringWithFormat:@"%@",authDic[@"auth"]];
-                NSMutableArray *uploadArr = [self getEventByAuth:auth];
+                NSArray *eventArr = [self getEventByAuth:auth];
+                NSMutableArray *uploadArr = [self getUploadEvent:eventArr];
                 NSArray *arrId = [self getEventIdByAuth:auth];
                 [self uploadEventToServer:uploadArr.copy auth:auth completeBlock:^(BOOL success) {
                     if (success) {
                         [self clearEventById:arrId];
+                        [self clearEventByEvent:eventArr];
                     }
                     [self delayCheckToUploadEvent:success?minDelayUploadEvent:maxDelayUploadEvent];
                 }];
                 return;
             }
             
-        }
-    }
-    
-    NSMutableDictionary * lastOne = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where auth is not null and trim(auth) !='' and fullTime = 1 order by autoIncrementId desc  limit 1"];
-    if (lastOne && lastOne[@"at"]) {
-        long long  at = [lastOne[@"at"] longLongValue];
-        if (llabs([self curentTime] - at) >= 30*1000) {
-            if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
-                NSLog(@"DWHSDK ----------> info log 有超过30秒未上传的打点");
-            }
-            NSString *auth = [NSString stringWithFormat:@"%@",lastOne[@"auth"]];
-            NSMutableArray *uploadArr = [self getEventByAuth:auth];
-            NSArray *arrId = [self getEventIdByAuth:auth];
-            [self uploadEventToServer:uploadArr.copy auth:auth completeBlock:^(BOOL success) {
-                if (success) {
-                    [self clearEventById:arrId];
-                }
-                [self delayCheckToUploadEvent:success?minDelayUploadEvent:maxDelayUploadEvent];
-            }];
-            return;
         }
     }
     [self delayCheckToUploadEvent:maxDelayUploadEvent];
@@ -493,6 +482,13 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         }
     }];
 }
+- (void)clearEventByEvent:(NSArray *)arr{
+    [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
+        for (DWHEventModel *event in arr) {
+            [db dWHExecDelete:[NSString stringWithFormat:@"delete from DWHEventModel where autoGrowthID = '%i' and eventName = '%@' and at = '%lld'",event.autoGrowthID,event.eventName,event.at]];
+        }
+    }];
+}
 - (NSArray *)getEventIdByAuth:(NSString *)auth{
     NSArray *arr =   [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId from DWHEventModel where auth = '%@' and fullTime = 1  limit 10",auth]];
     NSMutableArray *uploadArr = [[NSMutableArray alloc] init];
@@ -501,11 +497,13 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }
     return uploadArr.copy;
 }
-- (NSMutableArray *)getEventByAuth:(NSString *)auth{
-    NSArray *arr = [DWHEventModel dWHQueryForObjectArray:[NSString stringWithFormat:@"select * from DWHEventModel where auth = '%@' and fullTime = 1 limit 10",auth]];
+- (NSArray *)getEventByAuth:(NSString *)auth{
+     NSArray *arr = [DWHEventModel dWHQueryForObjectArray:[NSString stringWithFormat:@"select * from DWHEventModel where auth = '%@' and fullTime = 1 limit 10",auth]];
+    return arr;
+}
+- (NSMutableArray *)getUploadEvent:(NSArray *)arr{
     NSMutableArray *uploadArr = [[NSMutableArray alloc] init];
     for (DWHEventModel *model in arr) {
-//        NSLog(@"model:%@",model.session_id);
         NSMutableDictionary *uploadPar = [[NSMutableDictionary alloc] init];
         [uploadPar setValue:model.eventName forKey:@"event"];
         [uploadPar setValue:@(model.at) forKey:@"event_ts"];
@@ -660,6 +658,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     return @"1.0";
 }
 + (NSString *)sdkVersion{
-    return @"1.3.6";
+    return @"1.3.8";
 }
 @end

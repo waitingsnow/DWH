@@ -7,8 +7,7 @@
 //
 
 #import "AppDelegate.h"
-#import "DWHSDK.h"
-#import "NSDictionary+Extension.h"
+#import <DWH/DWH.h>
 @interface AppDelegate ()
 
 @end
@@ -22,9 +21,8 @@
     NSLog(@"uid:%@",[DWHSDK keychain_id]);
     
     [[DWHSDK dwhSDK] setLogLevel:DWHSDKLogLevelInfo];
-    NSLog(@"att json:%@",[@{} toJSonString]);
     NSMutableDictionary *dic = [NSMutableDictionary new];
-    [dic setValue:[NSNull null] forKey:[NSNull null]];
+//    [dic setValue:[NSNull null] forKey:[NSNull null]];
     NSLog(@"dic:%@",dic);
     [[DWHSDK dwhSDK] initializeProjectId:1 isProductionEnv:false];
     [[DWHSDK dwhSDK] setUserId:5702364 withProperties:@{@"gender":@"M",@"nation":@"Germany",@"timezone":@2} andToken:@"405fccc62d332df452578cbbe86d9dc2"];

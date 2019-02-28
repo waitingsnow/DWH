@@ -7,7 +7,7 @@
 //
 
 #import "ViewController.h"
-#import "DWHSDK.h"
+#import <DWH/DWH.h>
 #import "TestLab.h"
 @interface ViewController ()
 @property (nonatomic, assign) long long startTime;
@@ -52,7 +52,7 @@
     }else{
         NSLog(@"秒");
     }
-    NSLog(@"t3:%ld",(long long)(([[NSProcessInfo processInfo] systemUptime]-self.startTime)*1000));
+    NSLog(@"t3:%lld",(long long)(([[NSProcessInfo processInfo] systemUptime]-self.startTime)*1000));
     [[DWHSDK dwhSDK] logEvent:@"testEvent" withEventProperties:@{@"ccc":@"dd"}];
 //    [[DWHSDK dwhSDK] setUserId:@"5702364" withProperties:@{@"gender":@"M",@"nation":@"Germany",@"timezone":@2}];
 }

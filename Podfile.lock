@@ -1,0 +1,24 @@
+PODS:
+  - DWH (1.4.3):
+    - UICKeyChainStore
+  - UICKeyChainStore (2.1.2)
+
+DEPENDENCIES:
+  - DWH (from `./`)
+  - UICKeyChainStore
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - UICKeyChainStore
+
+EXTERNAL SOURCES:
+  DWH:
+    :path: "./"
+
+SPEC CHECKSUMS:
+  DWH: c11a2e7c75747b88d6359f72e3cd84368f325328
+  UICKeyChainStore: 85db518bb1d294366d15ec9b92a416c4e670518f
+
+PODFILE CHECKSUM: 6c8843db09cf6f8e5aa8ece0488de62fb92647c8
+
+COCOAPODS: 1.6.1

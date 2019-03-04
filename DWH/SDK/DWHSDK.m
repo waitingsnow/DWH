@@ -76,6 +76,7 @@ static NSInteger maxDelayUploadEvent  = 5;
 
 @property (nonatomic, assign) int autoGrowthId;
 @property (nonatomic, assign) NSInteger maxUploadTime;
+@property (nonatomic, strong) NSArray *uploadEventIDDatas;
 @end
 
 static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
@@ -388,11 +389,33 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     if (self.isUploadingEventNow) {
         return;
     }
-    NSMutableDictionary * dic = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where auth is not null and trim(auth) !=''  and fullTime = 1 order by autoIncrementId   limit 1"];
+    if (self.uploadEventIDDatas.count) {
+        NSMutableDictionary *countDic = [DWHEventModel dWHQueryForDictionary:[NSString stringWithFormat:@"select count(eventName) as t from DWHEventModel where autoGrowthID in (%@)  and at in(%@)",[self autoGrowthIDToArrayString],[self autoEventAtToArrayString]]];
+        if (countDic && countDic[@"t"]) {
+            if ([countDic[@"t"] intValue] > 0) {
+                [self clearEventByEvent:self.uploadEventIDDatas];
+                countDic = [DWHEventModel dWHQueryForDictionary:[NSString stringWithFormat:@"select count(eventName) as t from DWHEventModel where autoGrowthID in (%@)  and at in(%@)",[self autoGrowthIDToArrayString],[self autoEventAtToArrayString]]];
+                if (countDic && countDic[@"t"]) {
+                    if ([countDic[@"t"] intValue] == 0) {
+                        self.uploadEventIDDatas = nil;
+                    }
+                }
+            }else{
+                self.uploadEventIDDatas = nil;
+            }
+        }
+    }
     
+    NSMutableDictionary * dic = nil;
+    if (self.uploadEventIDDatas.count) {
+        dic = [DWHEventModel dWHQueryForDictionary:[NSString stringWithFormat:@"select * from  DWHEventModel where auth is not null and trim(auth) !=''  and fullTime = 1 and autoGrowthID not in (%@) and at not in(%@) order by autoIncrementId   limit 1",[self autoGrowthIDToArrayString],[self autoEventAtToArrayString]]];
+    }else{
+        dic = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where auth is not null and trim(auth) !=''  and fullTime = 1 order by autoIncrementId   limit 1"];
+    }
     if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
         NSLog(@"DWHSDK ----------> info log 5秒轮询 未上传的event");
     }
+   
     if (dic && dic[@"at"]) {
         long long  at = [dic[@"at"] longLongValue];
         if (llabs([self curentTime] - at) >= self.maxUploadTime*1000) {
@@ -401,6 +424,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
             }
             NSString *auth = [NSString stringWithFormat:@"%@",dic[@"auth"]];
             NSArray *eventArr = [self getEventByAuth:auth];
+           
             NSMutableArray *uploadArr = [self getUploadEvent:eventArr];
             NSArray *arrId = [self getEventIdByAuth:auth];
             [self uploadEventToServer:uploadArr.copy auth:auth completeBlock:^(BOOL success) {
@@ -408,6 +432,14 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
                     [self clearEventById:arrId];
                     //服务器端存在相同事件点，根据上传点再次删除一次 看效果
                     [self clearEventByEvent:eventArr];
+                    
+                    if (self.uploadEventIDDatas) {
+                        NSMutableArray *arr = [[NSMutableArray alloc] initWithArray:self.uploadEventIDDatas];
+                        [arr addObjectsFromArray:eventArr];
+                        self.uploadEventIDDatas = arr.copy;
+                    }else{
+                        self.uploadEventIDDatas = eventArr.copy;
+                    }
                 }
                 [self delayCheckToUploadEvent:success?minDelayUploadEvent:maxDelayUploadEvent];
             }];
@@ -415,14 +447,24 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         }
     }
     
-    NSMutableDictionary * countDic = [DWHEventModel dWHQueryForDictionary:@"select count(*) as count from DWHEventModel where auth is not null and trim(auth) !='' and fullTime = 1"];
+    NSMutableDictionary * countDic = nil;
+    if (self.uploadEventIDDatas.count) {
+         countDic =  [DWHEventModel dWHQueryForDictionary:[NSString stringWithFormat:@"select count(*) as count from DWHEventModel where auth is not null and trim(auth) !='' and fullTime = 1  and autoGrowthID not in (%@) and at not in(%@)",[self autoGrowthIDToArrayString],[self autoEventAtToArrayString]]];
+    }else{
+        countDic =  [DWHEventModel dWHQueryForDictionary:@"select count(*) as count from DWHEventModel where auth is not null and trim(auth) !='' and fullTime = 1"];
+    }
     if (countDic && countDic[@"count"]) {
         int rowCount = [countDic[@"count"] intValue];
         if (rowCount >= 10) {
             if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
                 NSLog(@"DWHSDK ----------> info log 有超过10条未上传的event");
             }
-            NSMutableDictionary * authDic = [DWHEventModel dWHQueryForDictionary:@"select auth from DWHEventModel where auth is not null and trim(auth) !='' and fullTime = 1  limit 1"];
+            NSMutableDictionary * authDic = nil;
+            if(self.uploadEventIDDatas.count){
+                authDic = [DWHEventModel dWHQueryForDictionary:[NSString stringWithFormat:@"select auth from DWHEventModel where auth is not null and trim(auth) !='' and fullTime = 1 and autoGrowthID not in (%@) and at not in(%@)  limit 1",[self autoGrowthIDToArrayString],[self autoEventAtToArrayString]]];
+            }else{
+             authDic = [DWHEventModel dWHQueryForDictionary:@"select auth from DWHEventModel where auth is not null and trim(auth) !='' and fullTime = 1  limit 1"];
+            }
             //            NSLog(@"authDic:%@",authDic);
             if (authDic && authDic[@"auth"]) {
                 NSString *auth = [NSString stringWithFormat:@"%@",authDic[@"auth"]];
@@ -490,7 +532,12 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }];
 }
 - (NSArray *)getEventIdByAuth:(NSString *)auth{
-    NSArray *arr =   [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId from DWHEventModel where auth = '%@' and fullTime = 1  limit 10",auth]];
+    NSArray *arr =   nil;
+    if (self.uploadEventIDDatas) {
+        arr = [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId from DWHEventModel where auth = '%@' and fullTime = 1  and autoGrowthID not in (%@) and at not in(%@)  limit 10",auth,[self autoGrowthIDToArrayString],[self autoEventAtToArrayString]]];
+    }else{
+        arr = [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId from DWHEventModel where auth = '%@' and fullTime = 1  limit 10",auth]];
+    }
     NSMutableArray *uploadArr = [[NSMutableArray alloc] init];
     for(DWHEventId *eventId in arr){
         [uploadArr addObject:eventId.autoIncrementId];
@@ -498,8 +545,36 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     return uploadArr.copy;
 }
 - (NSArray *)getEventByAuth:(NSString *)auth{
-     NSArray *arr = [DWHEventModel dWHQueryForObjectArray:[NSString stringWithFormat:@"select * from DWHEventModel where auth = '%@' and fullTime = 1 limit 10",auth]];
-    return arr;
+    if (self.uploadEventIDDatas.count) {
+        NSArray *arr = [DWHEventModel dWHQueryForObjectArray:[NSString stringWithFormat:@"select * from DWHEventModel where auth = '%@' and fullTime = 1 and autoGrowthID not in (%@) and at not in(%@)  limit 10",auth,[self autoGrowthIDToArrayString],[self autoEventAtToArrayString]]];
+        return arr;
+    }else{
+        NSArray *arr = [DWHEventModel dWHQueryForObjectArray:[NSString stringWithFormat:@"select * from DWHEventModel where auth = '%@' and fullTime = 1 limit 10",auth]];
+        return arr;
+    }
+}
+- (NSString *)autoGrowthIDToArrayString{
+    NSMutableArray *arr = [[NSMutableArray alloc] init];
+    for (int i=0; i<self.uploadEventIDDatas.count; i++) {
+        DWHEventModel *event = self.uploadEventIDDatas[i];
+        [arr addObject:@(event.autoGrowthID)];
+    }
+    if (arr.count) {
+        return [arr componentsJoinedByString:@","];
+    }
+    return nil;
+}
+
+- (NSString *)autoEventAtToArrayString{
+    NSMutableArray *arr = [[NSMutableArray alloc] init];
+    for (int i=0; i<self.uploadEventIDDatas.count; i++) {
+        DWHEventModel *event = self.uploadEventIDDatas[i];
+        [arr addObject:@(event.at)];
+    }
+    if (arr.count) {
+        return [arr componentsJoinedByString:@","];
+    }
+    return nil;
 }
 - (NSMutableArray *)getUploadEvent:(NSArray *)arr{
     NSMutableArray *uploadArr = [[NSMutableArray alloc] init];

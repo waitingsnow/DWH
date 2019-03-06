@@ -686,7 +686,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }else{
         NSString *md5 = [[[uuidString dataUsingEncoding:NSUTF8StringEncoding] md5String] uppercaseString];
         [[UICKeyChainStore keyChainStore] setString:md5 forKey:@"DWHAPPDeviceID"];
-        return uuidString;
+        return md5;
     }
 }
 + (NSString *)randomUUID{

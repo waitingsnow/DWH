@@ -662,28 +662,30 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     return uuidString;
 }
 + (NSString *)device_id{
+    NSString *key = [[UICKeyChainStore keyChainStore] stringForKey:@"DWHAPPDeviceID"];
+    if (key.length) {
+        return key;
+    }
     BOOL on = [[ASIdentifierManager sharedManager] isAdvertisingTrackingEnabled];
     NSString *uuidString = @"";
     if (on) {
         uuidString =  [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     }
     if (uuidString.length < 10) {
-        NSString *key = [[UICKeyChainStore keyChainStore] stringForKey:@"DWHAPPDeviceID"];
-        if (key.length) {
-            return key;
-        }else{
-            CFUUIDRef uuid;
-            CFStringRef uuidStr;
-            uuid = CFUUIDCreate(NULL);
-            uuidStr = CFUUIDCreateString(NULL, uuid);
-            uuidString =[NSString stringWithFormat:@"%@-%lld",uuidStr,(long long)[[NSDate date] timeIntervalSince1970]];
-            CFRelease(uuidStr);
-            CFRelease(uuid);
-            NSString *md5 = [[[uuidString dataUsingEncoding:NSUTF8StringEncoding] md5String] uppercaseString];
-            [[UICKeyChainStore keyChainStore] setString:md5 forKey:@"DWHAPPDeviceID"];
-            return md5;
-        }
+        CFUUIDRef uuid;
+        CFStringRef uuidStr;
+        uuid = CFUUIDCreate(NULL);
+        uuidStr = CFUUIDCreateString(NULL, uuid);
+        uuidString =[NSString stringWithFormat:@"%@-%lld",uuidStr,(long long)[[NSDate date] timeIntervalSince1970]];
+        CFRelease(uuidStr);
+        CFRelease(uuid);
+        NSString *md5 = [[[uuidString dataUsingEncoding:NSUTF8StringEncoding] md5String] uppercaseString];
+        [[UICKeyChainStore keyChainStore] setString:md5 forKey:@"DWHAPPDeviceID"];
+        return md5;
+        
     }else{
+        NSString *md5 = [[[uuidString dataUsingEncoding:NSUTF8StringEncoding] md5String] uppercaseString];
+        [[UICKeyChainStore keyChainStore] setString:md5 forKey:@"DWHAPPDeviceID"];
         return uuidString;
     }
 }
@@ -733,6 +735,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     return @"1.0";
 }
 + (NSString *)sdkVersion{
-    return @"1.3.8";
+    return @"1.3.9";
 }
 @end

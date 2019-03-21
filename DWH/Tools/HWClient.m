@@ -47,13 +47,12 @@ static NSString *apiUrl = @"";
     }
   
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-        if (error) {
-            [self handleResponse:error complete:complete];
-        }else{
-            NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
-            if(httpResponse && [httpResponse statusCode] == 200){
-                NSDictionary * dic = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
-                [self handleResponse:dic complete:complete];
+        
+        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
+        if(httpResponse){
+            NSInteger statusCode = [httpResponse statusCode];
+            if(statusCode >= 200 && statusCode <= 206 ){
+                [self handleResponse:@{} complete:complete];
             }else{
                 NSError *error = nil;
                 if(httpResponse){
@@ -61,10 +60,12 @@ static NSString *apiUrl = @"";
                 }else{
                     error = [[NSError alloc] initWithDomain:@"" code:-1 userInfo:nil];
                 }
-              [self handleResponse:error complete:complete];
+                [self handleResponse:error complete:complete];
             }
-            
+        }else{
+            [self handleResponse:error complete:complete];
         }
+        
     }];
     [task resume];
 }

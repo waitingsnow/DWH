@@ -11,7 +11,20 @@
 
 static NSString *apiUrl = @"";
 
+@interface HWClient()
+@property (nonatomic, strong) NSURLSessionDataTask *updateTask;
+@end
+
 @implementation HWClient
+
++ (instancetype)sharedManager{
+    static HWClient *_modelManager = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _modelManager = [[self alloc] init];
+    });
+    return _modelManager;
+}
 + (void)setEnv:(BOOL)isProduction{
     if (isProduction) {
         apiUrl = @"https://dw-api.holla.world/";
@@ -28,8 +41,10 @@ static NSString *apiUrl = @"";
 
 +(void)requestServer:(NSString *)path withParameters:(NSDictionary *)parameters auth:(NSString *)auth method:(NSString *)method completeBlock:(EXUCompleteBlock)complete{
     
+   
     NSURLSession *session = [NSURLSession sharedSession];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@",apiUrl,path]]];
+    [request setTimeoutInterval:300];
     [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     [request setValue:@"application/json; charset=utf-8" forHTTPHeaderField:@"Content-Type"];
     [request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
@@ -45,7 +60,10 @@ static NSString *apiUrl = @"";
             [request setHTTPBody:jsonData];
         }
     }
-  
+    if ( [HWClient sharedManager].updateTask) {
+        [[HWClient sharedManager].updateTask cancel];
+        [HWClient sharedManager].updateTask = nil;
+    }
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
         
         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse*)response;
@@ -65,8 +83,12 @@ static NSString *apiUrl = @"";
         }else{
             [self handleResponse:error complete:complete];
         }
-        
+        if ( [HWClient sharedManager].updateTask) {
+            [[HWClient sharedManager].updateTask cancel];
+            [HWClient sharedManager].updateTask = nil;
+        }
     }];
+    [HWClient sharedManager].updateTask = task;
     [task resume];
 }
 

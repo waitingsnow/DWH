@@ -8,7 +8,7 @@
 
 #import "HWClient.h"
 #import "DWHNSObject+ORM.h"
-
+#import "NSString+Extension.h"
 static NSString *apiUrl = @"";
 
 @interface HWClient()
@@ -38,7 +38,9 @@ static NSString *apiUrl = @"";
 + (void)postToPath:(NSString *)path withParameters:(NSDictionary *)parameters auth:(NSString *)auth completeBlock:(EXUCompleteBlock)complete{
     [self requestServer:path withParameters:parameters auth:auth method:@"POST" completeBlock:complete];
 }
-
++ (void)getToPath:(NSString *)path withParameters:(NSDictionary *)parameters auth:(NSString *)auth completeBlock:(EXUCompleteBlock)complete{
+    [self requestServer:path withParameters:parameters auth:auth method:@"GET" completeBlock:complete];
+}
 +(void)requestServer:(NSString *)path withParameters:(NSDictionary *)parameters auth:(NSString *)auth method:(NSString *)method completeBlock:(EXUCompleteBlock)complete{
     
    
@@ -70,7 +72,14 @@ static NSString *apiUrl = @"";
         if(httpResponse){
             NSInteger statusCode = [httpResponse statusCode];
             if(statusCode >= 200 && statusCode <= 206 ){
-                [self handleResponse:@{} complete:complete];
+                NSDictionary *responseDic = @{};
+                if (data) {
+                    NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+                    if (result.length) {
+                        responseDic = [result toDictionary];
+                    }
+                }
+                [self handleResponse:responseDic complete:complete];
             }else{
                 NSError *error = nil;
                 if(httpResponse){

@@ -21,10 +21,7 @@ typedef enum : NSUInteger {
 + (NSString *)sdkVersion;
 
 - (void)setLogLevel:(DWHSDKLogLevel)logLevel;
-/**
- 秒
- **/
-- (void)setServerTime:(long long)serverTime;
+
 /**
  初始化
  isProduction = false测试环境 会显示日志 测试服务器地址
@@ -38,8 +35,8 @@ typedef enum : NSUInteger {
  @[@"timezone",@"device_language",@"device",@"platform",@"app_version",@"uid"]
  birthday 格式 YYYY-MM-dd
  */
-- (void)setUserId:(NSInteger )userId withToken:(NSString *)token;
-- (void)setUserId:(NSInteger )userId  withProperties:( NSDictionary * _Nullable )userProperties andToken:(NSString *)token;
+- (void)setUserId:(NSInteger )userId ;
+- (void)setUserId:(NSInteger )userId  withProperties:( NSDictionary * _Nullable )userProperties;
 
 /*
  增量 更新 userProperties

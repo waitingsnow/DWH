@@ -68,7 +68,6 @@ static NSInteger maxDelayUploadEvent  = 5;
 
 @property (nonatomic, assign) NSInteger userId;
 @property (nonatomic, assign) NSInteger projectID;
-@property (nonatomic, copy) NSString *auth;
 @property (nonatomic, copy) NSString *currentSessionId;
 @property (nonatomic, assign) DWHSDKLogLevel dwhLogLevel;
 @property (nonatomic, assign) long long appStartTime;
@@ -77,6 +76,7 @@ static NSInteger maxDelayUploadEvent  = 5;
 @property (nonatomic, assign) int autoGrowthId;
 @property (nonatomic, assign) NSInteger maxUploadTime;
 @property (nonatomic, strong) NSArray *uploadEventIDDatas;
+@property (nonatomic, assign) NSInteger requestServerTimeCount;
 @end
 
 static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
@@ -116,20 +116,40 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 }
 - (void)initializeProjectId:(NSInteger )projectId isProductionEnv:(BOOL)isProduction{
     self.projectID = projectId;
-    self.auth = @"";
     [HWClient setEnv:isProduction];
     self.showLog = !isProduction;
     NSString *dbPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)lastObject];
-    dbPath = [dbPath stringByAppendingPathComponent:@"/dwh7.db"];
+    dbPath = [dbPath stringByAppendingPathComponent:@"/dwhEvent1.db"];
     [DWHORMDB configDBPath:dbPath showLog:self.showLog];
     [DWHEventModel dWHCreateTable];
+    self.requestServerTimeCount = 0;
+    [self updateServerTime];
+
+}
+- (void)updateServerTime{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(updateServerTime) object:nil];
+    self.requestServerTimeCount += 1;
+    [HWClient getToPath:@"timestamp" withParameters:nil auth:nil
+           completeBlock:^(BOOL success, id result) {
+               if (success && result && [result isKindOfClass:[NSDictionary class]]) {
+                   NSDictionary *dic = (NSDictionary *)result;
+                   if (dic.count) {
+                     long long time =  [dic[@"timestamp"] longLongValue];
+                       [self setServerTime:time];
+                   }else{
+                       [self performSelector:@selector(updateServerTime) withObject:nil afterDelay:self.requestServerTimeCount>3?8:4];
+                   }
+               }else{
+                   [self performSelector:@selector(updateServerTime) withObject:nil afterDelay:self.requestServerTimeCount>3?8:4];
+               }
+           }];
 }
 #pragma mark 启动sdk 获取auth
-- (void)setUserId:(NSInteger )userId  withToken:(NSString *)token{
-    [self setUserId:userId withProperties:nil andToken:token];
+- (void)setUserId:(NSInteger )userId{
+    [self setUserId:userId withProperties:nil];
 }
 
-- (void)setUserId:(NSInteger )userId withProperties:(NSDictionary *)userProperties andToken:(NSString *)token{
+- (void)setUserId:(NSInteger )userId withProperties:(NSDictionary *)userProperties{
     if (userProperties == nil) {
         self.userProperties = [[NSMutableDictionary alloc] init];
     }else {
@@ -148,7 +168,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         }
         return;
     }
-    if (userId!=0 && token.length) {
+    if (userId!=0) {
         
         NSString *birthday = [NSString stringWithFormat:@"%@",self.userProperties[@"birthday"]];
         if (birthday.length > 10) {
@@ -167,20 +187,17 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         [mudic setValue:[NSString stringWithFormat:@"%@",[DWHSDK clientVersion]] forKey:@"version"];
         [mudic setValue:self.userProperties forKey:@"attributes"];
         
-        self.auth = [NSString stringWithFormat:@"%@",token];
+        
         if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
             NSLog(@"DWHSDK ----------> info log userId设置成功已经拿到auth");
         }
-        [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
-            [db dWHExecUpdate:[NSString stringWithFormat:@"update DWHEventModel set auth ='%@' where auth is null or trim(auth)='' ",self.auth]];
-        }];
+        
         [self runOnBackgroundQueue:^{
             [self checkToUploadEvent];
         }];
     
     }else {
         [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkToUploadEvent) object:nil];
-        self.auth = @"";
     }
 }
 
@@ -285,7 +302,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }
     event.autoGrowthID = self.autoGrowthId;
     self.autoGrowthId = self.autoGrowthId + 1;
-    event.auth = self.auth;
     event.device_id = [DWHSDK keychain_id];
     
     NSMutableDictionary *userAttribute = [[NSMutableDictionary alloc] init];
@@ -625,7 +641,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
         [db dWHExecUpdate:[NSString stringWithFormat:@"update DWHEventModel set auth ='' where auth ='%@' ",auth]];
     }];
-    [self setUserId:self.userId withProperties:self.userProperties andToken:auth];
+    [self setUserId:self.userId withProperties:self.userProperties];
     if (DWHSDKLogLevelError >= self.dwhLogLevel) {
         NSLog(@"DWHSDK ----------> error log 打点上传发生401错误,重置auth");
     }

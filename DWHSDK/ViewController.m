@@ -57,7 +57,7 @@
 //    [[DWHSDK dwhSDK] setUserId:@"5702364" withProperties:@{@"gender":@"M",@"nation":@"Germany",@"timezone":@2}];
 }
 - (void)testClick2{
-    [[DWHSDK dwhSDK] setServerTime:[[NSDate date] timeIntervalSince1970]*1000];
+//    [[DWHSDK dwhSDK] setServerTime:[[NSDate date] timeIntervalSince1970]*1000];
 }
 
 - (void)testClick{

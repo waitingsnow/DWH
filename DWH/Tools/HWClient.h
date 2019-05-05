@@ -25,5 +25,5 @@ static NSString *StopUsingDataWarehouse = @"StopUsingDataWarehouse";
     withParameters:(NSDictionary *)parameters
               auth:(NSString *)auth
      completeBlock:(EXUCompleteBlock)complete;
-
++ (void)getToPath:(NSString *)path withParameters:(NSDictionary *)parameters auth:(NSString *)auth completeBlock:(EXUCompleteBlock)complete;
 @end

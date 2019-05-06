@@ -238,7 +238,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         
         dispatch_async(dispatch_get_main_queue(), ^{
             NSTimeInterval remainingTime =  [[UIApplication sharedApplication] backgroundTimeRemaining];
-            [self performSelector:@selector(endBackgroundTask) withObject:nil afterDelay:MAX(remainingTime-0.1, 0)];
+            [self performSelector:@selector(endBackgroundTask) withObject:nil afterDelay:MIN(MAX(remainingTime-0.1, 0), 30)];
         });
     }
     

@@ -103,15 +103,25 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
         NSLog(@"DWHSDK ----------> 设置服务器时间:%lld",self.serverStandardTime);
     }
-    NSArray *arr =   [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId,at from DWHEventModel  where fullTime = 0"]];
+    NSArray *arr =   [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId,at,localTime from DWHEventModel  where fullTime = 0"]];
+    long nowTime = [[NSDate date] timeIntervalSince1970]*1000;
+    long long nowDifferenceForServerTime = nowTime-serverTime;//设置服务器时间的时候，本地时间和服务器时间的差多少毫秒
+   
     for (DWHEventId * model in arr) {
         long long time = [[NSProcessInfo processInfo] systemUptime]*1000 - model.at;
         if (time < 0) {
-            time = 0;
+            long targetTime = serverTime;
+            if (model.localTime) {
+                targetTime = model.localTime-nowDifferenceForServerTime;
+            }
+            [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
+                [db dWHExecUpdate:[NSString stringWithFormat:@"update  DWHEventModel set at = %lld,fullTime = 1 where autoIncrementId = %@",targetTime,model.autoIncrementId]];
+            }];
+        }else{
+            [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
+                [db dWHExecUpdate:[NSString stringWithFormat:@"update  DWHEventModel set at = %lld,fullTime = 1 where autoIncrementId = %@",self.serverStandardTime-time,model.autoIncrementId]];
+            }];
         }
-        [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
-            [db dWHExecUpdate:[NSString stringWithFormat:@"update  DWHEventModel set at = %lld,fullTime = 1 where autoIncrementId = %@",self.serverStandardTime-time,model.autoIncrementId]];
-        }];
     }
 }
 - (void)initializeProjectId:(NSInteger )projectId isProductionEnv:(BOOL)isProduction{
@@ -293,10 +303,10 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         event.fullTime = 0;
     }else{
         long long seconds  = ([[NSProcessInfo processInfo] systemUptime]-self.appStartTime)*1000;
-        
         event.fullTime = 1;
         event.at = self.serverStandardTime+seconds;
     }
+    event.localTime = [[NSDate date] timeIntervalSince1970]*1000;
     if (self.autoGrowthId > 500) {
         self.autoGrowthId = 1;
     }

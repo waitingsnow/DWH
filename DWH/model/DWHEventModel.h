@@ -22,4 +22,6 @@
 @property (nonatomic, assign) int fullTime;
 @property (nonatomic, assign) long long occurTime;
 @property (nonatomic, assign) int autoGrowthID;
+
+@property (nonatomic, assign) long long localTime;
 @end

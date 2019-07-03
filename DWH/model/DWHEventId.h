@@ -11,4 +11,5 @@
 @interface DWHEventId : NSObject
 @property (nonatomic, copy) NSString *autoIncrementId;
 @property (nonatomic, assign) long long at;
+@property (nonatomic, assign) long long localTime;
 @end

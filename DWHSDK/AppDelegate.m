@@ -30,13 +30,13 @@
 //    [[DWHSDK dwhSDK] updateUserProperties:@{@"c":@1,@"e":@(1.89765)}];
 //    dispatch_queue_t t =  dispatch_queue_create("hw_queue_event_handle", DISPATCH_QUEUE_CONCURRENT);
 //    dispatch_async(t, ^{
-//        [[DWHSDK dwhSDK] logEvent:@"aaaa" withEventProperties:@{@"aaa":@"bbb"}];
+        [[DWHSDK dwhSDK] logEvent:@"aaaa" withEventProperties:@{@"aaa":@"bbb"}];
 //    });
 //    dispatch_async(t, ^{
-//       [[DWHSDK dwhSDK] updateUserProperties:@{@"c":@1,@"e":@(1.89765)}];
+       [[DWHSDK dwhSDK] updateUserProperties:@{@"c":@1,@"e":@(1.89765)}];
 //    });
 //    dispatch_async(t, ^{
-//        [[DWHSDK dwhSDK] logEvent:@"bbbbb" withEventProperties:@{@"ccccc":@"bbb"}];
+        [[DWHSDK dwhSDK] logEvent:@"bbbbb" withEventProperties:@{@"ccccc":@"bbb"}];
 //    });
 //    dispatch_async(t, ^{
 //        [[DWHSDK dwhSDK] updateUserProperties:@{@"c":@1,@"e":@(1.89765)}];

@@ -688,7 +688,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         uuidString =  [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     }
     NSRange r = [uuidString rangeOfString:@"00000000"];
-    if (r.location > 1000 || r.location == NSNotFound) {
+    if (r.location == 0 || r.location != NSNotFound) {
         uuidString = @"";
     }
     if (uuidString.length < 10) {
@@ -732,7 +732,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         uuidString = [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     }
     NSRange r = [uuidString rangeOfString:@"00000000"];
-    if (r.location > 1000 || r.location == NSNotFound) {
+     if (r.location == 0 || r.location != NSNotFound) {
         uuidString = @"";
     }
     if (uuidString.length < 10) {

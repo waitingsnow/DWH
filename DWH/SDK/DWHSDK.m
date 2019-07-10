@@ -678,19 +678,25 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 + (NSString *)device_id{
     NSString *key = [[UICKeyChainStore keyChainStore] stringForKey:@"DWHAPPDeviceID"];
     if (key.length) {
-        return key;
+        if(![key isEqualToString:@"9F89C84A559F573636A47FF8DAED0D33"]){
+            return key;
+        }
     }
     BOOL on = [[ASIdentifierManager sharedManager] isAdvertisingTrackingEnabled];
     NSString *uuidString = @"";
     if (on) {
         uuidString =  [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     }
+    NSRange r = [uuidString rangeOfString:@"00000000"];
+    if (r.location > 1000 || r.location == NSNotFound) {
+        uuidString = @"";
+    }
     if (uuidString.length < 10) {
         CFUUIDRef uuid;
         CFStringRef uuidStr;
         uuid = CFUUIDCreate(NULL);
         uuidStr = CFUUIDCreateString(NULL, uuid);
-        uuidString =[NSString stringWithFormat:@"%@-%lld",uuidStr,(long long)[[NSDate date] timeIntervalSince1970]];
+        uuidString =[NSString stringWithFormat:@"%@-%lld",uuidStr,(long long)[[NSDate date] timeIntervalSince1970]*1000];
         CFRelease(uuidStr);
         CFRelease(uuid);
         NSString *md5 = [[[uuidString dataUsingEncoding:NSUTF8StringEncoding] md5String] uppercaseString];
@@ -716,19 +722,25 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 + (NSString *)keychain_id{
     NSString *key = [[UICKeyChainStore keyChainStore] stringForKey:@"DWHAPPUID"];
     if (key) {
-        return key;
+        if(![key isEqualToString:@"9F89C84A559F573636A47FF8DAED0D33"]){
+            return key;
+        }
     }
     BOOL on = [[ASIdentifierManager sharedManager] isAdvertisingTrackingEnabled];
     NSString *uuidString = @"";
     if (on) {
         uuidString = [[[ASIdentifierManager sharedManager] advertisingIdentifier] UUIDString];
     }
+    NSRange r = [uuidString rangeOfString:@"00000000"];
+    if (r.location > 1000 || r.location == NSNotFound) {
+        uuidString = @"";
+    }
     if (uuidString.length < 10) {
         CFUUIDRef uuid;
         CFStringRef uuidStr;
         uuid = CFUUIDCreate(NULL);
         uuidStr = CFUUIDCreateString(NULL, uuid);
-        uuidString =[NSString stringWithFormat:@"%@-%lld",uuidStr,(long long)[[NSDate date] timeIntervalSince1970]];
+        uuidString =[NSString stringWithFormat:@"%@-%lld",uuidStr,(long long)[[NSDate date] timeIntervalSince1970]*1000];
         CFRelease(uuidStr);
         CFRelease(uuid);
     }

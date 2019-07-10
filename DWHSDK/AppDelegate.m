@@ -20,6 +20,22 @@
     
     NSLog(@"uid:%@",[DWHSDK keychain_id]);
     
+    NSString *uid = @"00000000-0000-0000-0000-000000000000";
+    NSRange r = [uid rangeOfString:@"000000001"];
+    if(r.location == NSNotFound){
+        NSLog(@"1");
+    }else{
+        NSLog(@"2");
+    }
+    
+    CFUUIDRef uuid;
+    CFStringRef uuidStr;
+    uuid = CFUUIDCreate(NULL);
+    uuidStr = CFUUIDCreateString(NULL, uuid);
+    NSString * uuidString =[NSString stringWithFormat:@"%@-%lld",uuidStr,(long long)[[NSDate date] timeIntervalSince1970]*1000];
+    CFRelease(uuidStr);
+    CFRelease(uuid);
+    
     [[DWHSDK dwhSDK] setLogLevel:DWHSDKLogLevelInfo];
     NSMutableDictionary *dic = [NSMutableDictionary new];
 //    [dic setValue:[NSNull null] forKey:[NSNull null]];

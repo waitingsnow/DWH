@@ -104,19 +104,21 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         NSLog(@"DWHSDK ----------> 设置服务器时间:%lld",self.serverStandardTime);
     }
     NSArray *arr =   [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId,at,localTime from DWHEventModel  where fullTime = 0"]];
-    long nowTime = [[NSDate date] timeIntervalSince1970]*1000;
+    long long nowTime = [[NSDate date] timeIntervalSince1970]*1000;
     long long nowDifferenceForServerTime = nowTime-serverTime;//设置服务器时间的时候，本地时间和服务器时间的差多少毫秒
    
     for (DWHEventId * model in arr) {
         long long time = [[NSProcessInfo processInfo] systemUptime]*1000 - model.at;
         if (time < 0) {
-            long targetTime = serverTime;
+            long long targetTime = serverTime;
             if (model.localTime) {
                 targetTime = model.localTime-nowDifferenceForServerTime;
             }
-            [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
-                [db dWHExecUpdate:[NSString stringWithFormat:@"update  DWHEventModel set at = %lld,fullTime = 1 where autoIncrementId = %@",targetTime,model.autoIncrementId]];
-            }];
+            
+                [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
+                    [db dWHExecUpdate:[NSString stringWithFormat:@"update  DWHEventModel set at = %lld,fullTime = 1 where autoIncrementId = %@",targetTime,model.autoIncrementId]];
+                }];
+            
         }else{
             [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
                 [db dWHExecUpdate:[NSString stringWithFormat:@"update  DWHEventModel set at = %lld,fullTime = 1 where autoIncrementId = %@",self.serverStandardTime-time,model.autoIncrementId]];

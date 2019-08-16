@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name         = "DWH"
-  spec.version      = "2.0"
+  spec.version      = "2.1"
 
   spec.summary      = "DWH Framework data warehouse"
   spec.description  = <<-DESC

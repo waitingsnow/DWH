@@ -20,7 +20,7 @@
 #import "NSData+DWHAdd.h"
 #import <UIKit/UIKit.h>
 typedef void (^UploadCompleteBlock)(BOOL success);
-static NSInteger minDelayUploadEvent  = 5;
+static NSInteger minDelayUploadEvent  = 3;
 static NSInteger maxDelayUploadEvent  = 5;
 
 #ifndef weakify
@@ -61,8 +61,6 @@ static NSInteger maxDelayUploadEvent  = 5;
 
 @property (nonatomic, strong) NSMutableDictionary *userProperties;
 @property (nonatomic, strong) NSOperationQueue *backgroundQueue;
-@property (nonatomic, assign) NSInteger failureCount;
-@property (nonatomic, assign) BOOL isStopUsingDataWarehouse;
 @property (nonatomic, assign) BOOL isUploadingEventNow;
 @property (nonatomic, assign) BOOL showLog;
 
@@ -75,7 +73,6 @@ static NSInteger maxDelayUploadEvent  = 5;
 
 @property (nonatomic, assign) int autoGrowthId;
 @property (nonatomic, assign) NSInteger maxUploadTime;
-@property (nonatomic, strong) NSArray *uploadEventIDDatas;
 @property (nonatomic, assign) NSInteger requestServerTimeCount;
 @end
 
@@ -115,9 +112,9 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
                 targetTime = model.localTime-nowDifferenceForServerTime;
             }
             
-                [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
+            [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
                     [db dWHExecUpdate:[NSString stringWithFormat:@"update  DWHEventModel set at = %lld,fullTime = 1 where autoIncrementId = %@",targetTime,model.autoIncrementId]];
-                }];
+            }];
             
         }else{
             [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
@@ -149,10 +146,20 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
                      long long time =  [dic[@"timestamp"] longLongValue];
                        [self setServerTime:time];
                    }else{
-                       [self performSelector:@selector(updateServerTime) withObject:nil afterDelay:self.requestServerTimeCount>3?8:4];
+                       if(self.requestServerTimeCount > 3){
+                           long long time = [self curentTime];
+                           [self setServerTime:time];
+                       }else{
+                           [self performSelector:@selector(updateServerTime) withObject:nil afterDelay:self.requestServerTimeCount>3?8:4];
+                       }
                    }
                }else{
-                   [self performSelector:@selector(updateServerTime) withObject:nil afterDelay:self.requestServerTimeCount>3?8:4];
+                   if(self.requestServerTimeCount > 3){
+                       long long time = [self curentTime];
+                       [self setServerTime:time];
+                   }else{
+                       [self performSelector:@selector(updateServerTime) withObject:nil afterDelay:self.requestServerTimeCount>2?8:4];
+                   }
                }
            }];
 }
@@ -168,12 +175,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         self.userProperties = [userProperties mutableCopy];
     }
     _userId = userId;
-    if(self.isStopUsingDataWarehouse){
-        if (DWHSDKLogLevelWarning >= self.dwhLogLevel) {
-            NSLog(@"DWHSDK ----------> warning log sdk已暂停");
-        }
-        return ;
-    }
+    
     if(!self.projectID){
         if (DWHSDKLogLevelError >= self.dwhLogLevel) {
              NSLog(@"DWHSDK ----------> error log 没有设置projectID");
@@ -216,7 +218,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 - (instancetype)init{
     self = [super init];
     if (self) {
-        self.failureCount = 0;
         self.maxUploadTime = 30;
         _backgroundQueue = [[NSOperationQueue alloc] init];
         [_backgroundQueue setMaxConcurrentOperationCount:1];
@@ -233,26 +234,22 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 }
 
 - (void)generateNewSessionId{
-    
-    if (!self.isStopUsingDataWarehouse) {
-        if (_backgroundTaskIdentifier == UIBackgroundTaskInvalid){
-            UIApplication *application = [UIApplication sharedApplication];
-            @weakify(self);
-            _backgroundTaskIdentifier = [application beginBackgroundTaskWithExpirationHandler:^{
-                @strongify(self);
-                [self endBackgroundTask];
-            }];
-        }
-        //等1秒开始检测未上传的打点，保证session end点都打到了
-//        [_backgroundQueue cancelAllOperations];
-        self.maxUploadTime = 0;
-        [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(delayCheckToUploadEvent:) object:nil];
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSTimeInterval remainingTime =  [[UIApplication sharedApplication] backgroundTimeRemaining];
-            [self performSelector:@selector(endBackgroundTask) withObject:nil afterDelay:MIN(MAX(remainingTime-0.1, 0), 30)];
-        });
+    if (_backgroundTaskIdentifier == UIBackgroundTaskInvalid){
+        UIApplication *application = [UIApplication sharedApplication];
+        @weakify(self);
+        _backgroundTaskIdentifier = [application beginBackgroundTaskWithExpirationHandler:^{
+            @strongify(self);
+            [self endBackgroundTask];
+        }];
     }
+    self.maxUploadTime = 0;
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(delayCheckToUploadEvent:) object:nil];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSTimeInterval remainingTime =  [[UIApplication sharedApplication] backgroundTimeRemaining];
+        [self performSelector:@selector(endBackgroundTask) withObject:nil afterDelay:MAX(remainingTime-0.1, 0)];
+    });
+    
     
     [self runOnBackgroundQueue:^{
         self.currentSessionId = [DWHSDK randomUUID];
@@ -267,7 +264,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 }
 - (BOOL)runOnBackgroundQueue:(void (^)(void))block{
     if ([[NSOperationQueue currentQueue].name isEqualToString:BACKGROUND_QUEUE_NAME]) {
-        //        NSLog(@"Already running in the background.");
         block();
         return NO;
     } else {
@@ -276,9 +272,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }
 }
 - (void)updateUserProperties:(NSDictionary *)userProperties{
-    if(self.isStopUsingDataWarehouse){
-        return ;
-    }
+   
     NSMutableDictionary *tmpDic = [userProperties mutableCopy];
     for (NSString *key in tmpDic){
         NSString *value = tmpDic[key];
@@ -403,6 +397,7 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         }
     }];
 }
+
 - (void)logEvent:(NSString *)eventName withEventProperties:(NSDictionary *)attributes{
     [self logEvent:eventName withEventProperties:attributes andUserProperties:nil];
 }
@@ -417,33 +412,14 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     if (self.isUploadingEventNow) {
         return;
     }
-    if (self.uploadEventIDDatas.count) {
-        NSMutableDictionary *countDic = [DWHEventModel dWHQueryForDictionary:[NSString stringWithFormat:@"select count(eventName) as t from DWHEventModel where autoGrowthID in (%@)  and at in(%@)",[self autoGrowthIDToArrayString],[self autoEventAtToArrayString]]];
-        if (countDic && countDic[@"t"]) {
-            if ([countDic[@"t"] intValue] > 0) {
-                [self clearEventByEvent:self.uploadEventIDDatas];
-                countDic = [DWHEventModel dWHQueryForDictionary:[NSString stringWithFormat:@"select count(eventName) as t from DWHEventModel where autoGrowthID in (%@)  and at in(%@)",[self autoGrowthIDToArrayString],[self autoEventAtToArrayString]]];
-                if (countDic && countDic[@"t"]) {
-                    if ([countDic[@"t"] intValue] == 0) {
-                        self.uploadEventIDDatas = nil;
-                    }
-                }
-            }else{
-                self.uploadEventIDDatas = nil;
-            }
-        }
-    }
     
-    NSMutableDictionary * dic = nil;
-    if (self.uploadEventIDDatas.count) {
-        dic = [DWHEventModel dWHQueryForDictionary:[NSString stringWithFormat:@"select * from  DWHEventModel where  fullTime = 1 and autoGrowthID not in (%@) and at not in(%@) order by autoIncrementId   limit 1",[self autoGrowthIDToArrayString],[self autoEventAtToArrayString]]];
-    }else{
-        dic = [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where fullTime = 1 order by autoIncrementId   limit 1"];
-    }
+    NSMutableDictionary * dic =  [DWHEventModel dWHQueryForDictionary:@"select * from  DWHEventModel where fullTime = 1 order by autoIncrementId   limit 1"];
+    
     if (DWHSDKLogLevelInfo >= self.dwhLogLevel) {
         NSLog(@"DWHSDK ----------> info log 5秒轮询 未上传的event");
     }
    
+    
     if (dic && dic[@"at"]) {
         long long  at = [dic[@"at"] longLongValue];
         if (llabs([self curentTime] - at) >= self.maxUploadTime*1000) {
@@ -451,7 +427,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
                 NSLog(@"DWHSDK ----------> info log 有超过30秒未上传的event");
             }
             NSArray *eventArr = [self getEventByAuth];
-           
             NSMutableArray *uploadArr = [self getUploadEvent:eventArr];
             NSArray *arrId = [self getEventIdByAuth];
             [self uploadEventToServer:uploadArr.copy auth:nil completeBlock:^(BOOL success) {
@@ -459,13 +434,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
                     [self clearEventById:arrId];
                     //服务器端存在相同事件点，根据上传点再次删除一次 看效果
                     [self clearEventByEvent:eventArr];
-                    if (self.uploadEventIDDatas) {
-                        NSMutableArray *arr = [[NSMutableArray alloc] initWithArray:self.uploadEventIDDatas];
-                        [arr addObjectsFromArray:eventArr];
-                        self.uploadEventIDDatas = arr.copy;
-                    }else{
-                        self.uploadEventIDDatas = eventArr.copy;
-                    }
                 }
                 [self delayCheckToUploadEvent:success?minDelayUploadEvent:maxDelayUploadEvent];
             }];
@@ -473,12 +441,8 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         }
     }
     
-    NSMutableDictionary * countDic = nil;
-    if (self.uploadEventIDDatas.count) {
-         countDic =  [DWHEventModel dWHQueryForDictionary:[NSString stringWithFormat:@"select count(*) as count from DWHEventModel where fullTime = 1  and autoGrowthID not in (%@) and at not in(%@)",[self autoGrowthIDToArrayString],[self autoEventAtToArrayString]]];
-    }else{
-        countDic =  [DWHEventModel dWHQueryForDictionary:@"select count(*) as count from DWHEventModel where  fullTime = 1"];
-    }
+    NSMutableDictionary * countDic = [DWHEventModel dWHQueryForDictionary:@"select count(*) as count from DWHEventModel where  fullTime = 1"];
+    
     if (countDic && countDic[@"count"]) {
         int rowCount = [countDic[@"count"] intValue];
         if (rowCount >= 10) {
@@ -504,7 +468,32 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 - (void)applicationDidBecomeActive:(NSNotification *)notification{
     [self endBackgroundTask];
     self.maxUploadTime = 30;
+    [self checkHasLargeDataNotUpload];
 }
+- (void)checkHasLargeDataNotUpload{
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkHasLargeDataNotUpload) object:nil];
+    NSDictionary  *countDic =  [DWHEventModel dWHQueryForDictionary:@"select count(*) as count from DWHEventModel where  fullTime = 0"];
+    if (countDic && countDic[@"count"]) {
+        int rowCount = [countDic[@"count"] intValue];
+        if (rowCount >= 100) {
+            NSDate *date = [NSDate date];
+            long long time = [date timeIntervalSince1970]*1000;
+            [self setServerTime:time];
+        }
+    }
+    
+    NSDictionary  *totalDic =  [DWHEventModel dWHQueryForDictionary:@"select count(*) as count from DWHEventModel"];
+    if (totalDic && totalDic[@"count"]) {
+        int rowCount = [totalDic[@"count"] intValue];
+        if (rowCount >= 100) {
+            [self delayCheckToUploadEvent:0];
+            [self performSelector:@selector(checkHasLargeDataNotUpload) withObject:nil afterDelay:6];
+            return;
+        }
+    }
+    [self performSelector:@selector(checkHasLargeDataNotUpload) withObject:nil afterDelay:20];
+}
+
 - (void)endBackgroundTask{
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(endBackgroundTask) object:nil];
      UIApplication *application = [UIApplication sharedApplication];
@@ -515,9 +504,6 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
 }
 
 - (void)delayCheckToUploadEvent:(NSTimeInterval)delay{
-    if(self.isStopUsingDataWarehouse){
-        return ;
-    }
     if (self.isUploadingEventNow) {
         return;
     }
@@ -548,12 +534,8 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     }];
 }
 - (NSArray *)getEventIdByAuth{
-    NSArray *arr =   nil;
-    if (self.uploadEventIDDatas) {
-        arr = [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId from DWHEventModel where fullTime = 1  and autoGrowthID not in (%@) and at not in(%@)  limit 10",[self autoGrowthIDToArrayString],[self autoEventAtToArrayString]]];
-    }else{
-        arr = [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId from DWHEventModel where  fullTime = 1  limit 10"]];
-    }
+    NSArray *arr =  [DWHEventId dWHQueryForObjectArray:[NSString stringWithFormat:@"select autoIncrementId from DWHEventModel where  fullTime = 1  limit 10"]];
+    
     NSMutableArray *uploadArr = [[NSMutableArray alloc] init];
     for(DWHEventId *eventId in arr){
         [uploadArr addObject:eventId.autoIncrementId];
@@ -561,37 +543,11 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     return uploadArr.copy;
 }
 - (NSArray *)getEventByAuth{
-    if (self.uploadEventIDDatas.count) {
-        NSArray *arr = [DWHEventModel dWHQueryForObjectArray:[NSString stringWithFormat:@"select * from DWHEventModel where  fullTime = 1 and autoGrowthID not in (%@) and at not in(%@) order by autoIncrementId limit 10",[self autoGrowthIDToArrayString],[self autoEventAtToArrayString]]];
+    NSArray *arr = [DWHEventModel dWHQueryForObjectArray:@"select * from DWHEventModel where  fullTime = 1 order by autoIncrementId limit 10"];
         return arr;
-    }else{
-        NSArray *arr = [DWHEventModel dWHQueryForObjectArray:@"select * from DWHEventModel where  fullTime = 1 order by autoIncrementId limit 10"];
-        return arr;
-    }
-}
-- (NSString *)autoGrowthIDToArrayString{
-    NSMutableArray *arr = [[NSMutableArray alloc] init];
-    for (int i=0; i<self.uploadEventIDDatas.count; i++) {
-        DWHEventModel *event = self.uploadEventIDDatas[i];
-        [arr addObject:@(event.autoGrowthID)];
-    }
-    if (arr.count) {
-        return [arr componentsJoinedByString:@","];
-    }
-    return nil;
+    
 }
 
-- (NSString *)autoEventAtToArrayString{
-    NSMutableArray *arr = [[NSMutableArray alloc] init];
-    for (int i=0; i<self.uploadEventIDDatas.count; i++) {
-        DWHEventModel *event = self.uploadEventIDDatas[i];
-        [arr addObject:@(event.at)];
-    }
-    if (arr.count) {
-        return [arr componentsJoinedByString:@","];
-    }
-    return nil;
-}
 - (NSMutableArray *)getUploadEvent:(NSArray *)arr{
     NSMutableArray *uploadArr = [[NSMutableArray alloc] init];
     for (DWHEventModel *model in arr) {
@@ -638,36 +594,13 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
         if (block) {
             block(success);
         }
-        if(!success && [result intValue] >= 500){
-            self.failureCount = self.failureCount +1;
-        }
-        if((!success && [result intValue] == 404) || (!success && [result intValue] == 410)){
-            self.failureCount = self.failureCount +1;
-        }
-        if (!success && [result integerValue] == 401) {
-            [self handleHTTP401Error:auth];
-        }
     }];
-}
-- (void)handleHTTP401Error:(NSString *)auth{
-    [DWHEventModel dWHExecSql:^(DWHSqlOperationQueueObject *db) {
-        [db dWHExecUpdate:[NSString stringWithFormat:@"update DWHEventModel set auth ='' where auth ='%@' ",auth]];
-    }];
-    [self setUserId:self.userId withProperties:self.userProperties];
-    if (DWHSDKLogLevelError >= self.dwhLogLevel) {
-        NSLog(@"DWHSDK ----------> error log 打点上传发生401错误,重置auth");
-    }
 }
 
 - (long long)curentTime{
     return  [[NSDate date] timeIntervalSince1970]*1000;
 }
-- (BOOL)isStopUsingDataWarehouse{
-    if (self.showLog && self.failureCount>3) {
-        NSLog(@"dwh 已经暂停");
-    }
-    return self.failureCount>3;
-}
+
 
 + (NSString *)idfa{
     BOOL on = [[ASIdentifierManager sharedManager] isAdvertisingTrackingEnabled];

@@ -8,7 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
-static inline int UserTimeZoneToUTC(){
+NS_ASSUME_NONNULL_BEGIN
+
+static inline int UserTimeZoneToUTC() {
     NSTimeZone* sourceTimeZone = [NSTimeZone timeZoneWithAbbreviation:@"UTC"];
     NSTimeZone* destinationTimeZone = [NSTimeZone localTimeZone];
     NSInteger differenceInSeconds = [destinationTimeZone secondsFromGMT] - [sourceTimeZone secondsFromGMT];
@@ -16,6 +18,10 @@ static inline int UserTimeZoneToUTC(){
 }
 
 @interface DWHSDKTool : NSObject
+
 + (NSString *)userDeviceLanguage;
 + (NSString *)userDeviceName;
+
 @end
+
+NS_ASSUME_NONNULL_END

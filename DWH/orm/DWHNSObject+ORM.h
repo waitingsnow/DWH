@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface DWHSqlOperationQueueObject : NSObject
 /**
  执行update sql
@@ -32,9 +34,9 @@
 @interface NSObject(Extensions)
 /**
  创建表
- 
  **/
 + (void)dWHCreateTable;
+
 /**
  保存数据
  @param keyes 数据保存参数条件
@@ -58,6 +60,9 @@
  **/
 + (void)dWHClearTable;
 
+/**
+ 清空特定条件数据
+ **/
 + (void)dWHClearTable:(NSArray *)keys withValue:(NSArray *)value;
 
 /**
@@ -66,7 +71,7 @@
  @param block 回调参数
  **/
 + (void)dWHSaveListData:(NSArray *)keys
-            andBlock:(void (^)(NSMutableArray *datas))block;
+			   andBlock:(void (^)(NSMutableArray *datas))block;
 
 
 /**
@@ -86,12 +91,17 @@
 /**
  执行自定义 sql  update/insert
  **/
-
 + (void)dWHExecSql:(void (^)(DWHSqlOperationQueueObject *db))block;
+
 @end
 
 @interface NSArray(ORM)
+
+/**
+ 存储匹配的数据
+ **/
 - (void)dWHSaveListDataWithKeys:(NSArray *)keys;
+
 @end
 
-
+NS_ASSUME_NONNULL_END

@@ -8,8 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
-static BOOL showsql =  FALSE;
+static BOOL showsql = FALSE;
 @interface DWHORMDB : NSObject
 
 /**
@@ -17,11 +18,11 @@ static BOOL showsql =  FALSE;
  **/
 +(void)configDBPath:(NSString *)path showLog:(BOOL)showLog;
 /**
- 开启事物
+ 开启事务
  **/
 +(void)beginTransaction;
 /**
- 关闭事物
+ 关闭事务
  **/
 +(void)commitTransaction;
 
@@ -29,12 +30,16 @@ static BOOL showsql =  FALSE;
  自定义查询
  **/
 + (NSMutableDictionary *)queryWithSql:(NSString *)sql;
+
 /**
  自定义查询
  **/
 + (NSMutableArray *)queryDB:(Class)cls andSql:(NSString *)sql;
-+(void)execsql:(NSString *)sql;
-+(void)saveObject:(id)object withSql:(NSString *)sql;
-+(BOOL)rowExist:(NSString *)sql;
++ (void)execsql:(NSString *)sql;
++ (void)saveObject:(id)object withSql:(NSString *)sql;
++ (BOOL)rowExist:(NSString *)sql;
 + (BOOL)columnExists:(NSString *)tableName andColumnName:(NSString *)column;
+
 @end
+
+NS_ASSUME_NONNULL_END

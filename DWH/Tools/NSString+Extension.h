@@ -8,6 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
-@interface NSString(Extension)
+NS_ASSUME_NONNULL_BEGIN
+
+@interface NSString (Extension)
+
 - (NSDictionary *)toDictionary;
+
 @end
+
+NS_ASSUME_NONNULL_END

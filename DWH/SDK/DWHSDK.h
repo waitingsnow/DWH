@@ -8,12 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
-typedef enum : NSUInteger {
+NS_ASSUME_NONNULL_BEGIN
+
+typedef enum: NSUInteger {
     DWHSDKLogLevelInfo,
     DWHSDKLogLevelWarning,
     DWHSDKLogLevelError,
     DWHSDKLogLevelNone,
 } DWHSDKLogLevel;
+
 @interface DWHSDK : NSObject
 
 + (instancetype)dwhSDK;
@@ -35,8 +38,8 @@ typedef enum : NSUInteger {
  @[@"timezone",@"device_language",@"device",@"platform",@"app_version",@"uid"]
  birthday 格式 YYYY-MM-dd
  */
-- (void)setUserId:(NSInteger )userId ;
-- (void)setUserId:(NSInteger )userId  withProperties:( NSDictionary * _Nullable )userProperties;
+- (void)setUserId:(NSInteger)userId;
+- (void)setUserId:(NSInteger)userId withProperties:(NSDictionary *)userProperties;
 
 /*
  增量 更新 userProperties
@@ -54,9 +57,9 @@ typedef enum : NSUInteger {
  打点
  */
 - (void)logEvent:(NSString *)eventName;
-- (void)logEvent:(NSString *)eventName  withEventProperties:(NSDictionary * _Nullable)attributes;
+- (void)logEvent:(NSString *)eventName withEventProperties:(NSDictionary * __nullable)attributes;
 
-- (void)logEvent:(NSString *)eventName  withEventProperties:(NSDictionary * _Nullable)attributes andUserProperties:( NSDictionary * _Nullable)userSpecialProperties;
+- (void)logEvent:(NSString *)eventName withEventProperties:(NSDictionary * __nullable)attributes andUserProperties:( NSDictionary * __nullable)userSpecialProperties;
 /**
  每次随机UID
  **/
@@ -67,4 +70,7 @@ typedef enum : NSUInteger {
  获取唯一不变的id
  **/
 + (NSString *)keychain_id;
+
 @end
+
+NS_ASSUME_NONNULL_END

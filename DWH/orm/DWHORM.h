@@ -9,10 +9,12 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
+
+NS_ASSUME_NONNULL_BEGIN
+
 #define force_inline __inline__ __attribute__((always_inline))
 
-
-static force_inline NSNumber * _Nullable ORMDBNumberCreateFromID(__unsafe_unretained id _Nullable value) {
+static force_inline NSNumber * __nullable ORMDBNumberCreateFromID(__unsafe_unretained id __nullable value) {
 	static NSCharacterSet *dot;
 	static NSDictionary *dic;
 	static dispatch_once_t onceToken;
@@ -67,7 +69,7 @@ static force_inline NSNumber * _Nullable ORMDBNumberCreateFromID(__unsafe_unreta
 	return nil;
 }
 
-static force_inline NSString * _Nullable createWhereStatement(NSArray * _Nullable key,NSArray * _Nullable value){
+static force_inline NSString * __nullable createWhereStatement(NSArray * __nullable key, NSArray * __nullable value) {
 	NSString *whereSql=@"";
 	for (int i=0; i<key.count; i++) {
 		NSString *type=[NSString stringWithFormat:@"%@",[value[i] class]];
@@ -105,7 +107,6 @@ static force_inline NSString * _Nullable createWhereStatement(NSArray * _Nullabl
 			}else{
 				whereSql=[NSString stringWithFormat:@"%@ AND  %@ = '%@'  ",whereSql,key[i],value[i]];
 			}
-			
 		}
 	}
 	return whereSql;
@@ -125,24 +126,24 @@ typedef NS_OPTIONS (NSUInteger ,ORMDBDataType){
 	ORMDBDataTypeDictionary,
 	ORMDBDataTypeMutableDictionary,
 	ORMDBDataTypeNSDate
-	
 };
 
 @protocol DWHORM <NSObject>
+
 @optional
 /**
  创建表时忽略字段
  **/
-+(NSArray<NSString *> *_Nonnull)sqlIgnoreColumn;
++(NSArray<NSString *> *)sqlIgnoreColumn;
 /**
  主键
  **/
-+(NSString * _Nonnull)primarilyKey;
++(NSString *)primarilyKey;
 
 /**
  外键
  **/
-+(NSString * _Nonnull)foreignKey;
++(NSString *)foreignKey;
 
 /**
  外键映射表操作类型
@@ -154,45 +155,48 @@ typedef NS_OPTIONS (NSUInteger ,ORMDBDataType){
 	return @{@"conversation_user":@"EXUPersonInfo"};
  }
  **/
-+(NSDictionary<NSString *, NSString *> *_Nonnull)foreignKeyNotCreateTable;
++(NSDictionary<NSString *, NSString *> *)foreignKeyNotCreateTable;
+
 @end
+
 @interface DWHORM : NSObject
 
-+ (void)createTableFromClass:(Class _Nullable ) cls;
-+ (void)saveEntity:(id _Nullable )entity with:(NSArray *_Nullable)keys;
-+ (id _Nullable )get:(Class _Nullable )cls withKeys:(NSArray *_Nullable)keys andValues:(NSArray *_Nullable)values;
-+ (NSMutableArray *_Nullable)list:(Class _Nullable )cls withKeys:(NSArray *_Nullable)keys andValues:(NSArray *_Nullable)values;
-+ (void)deleteObject:(Class _Nullable )cls withKeys:(NSArray *_Nullable)keys andValues:(NSArray *_Nullable)values;
++ (void)createTableFromClass:(Class __nullable) cls;
++ (void)saveEntity:(id __nullable)entity with:(NSArray * __nullable)keys;
++ (id __nullable)get:(Class __nullable)cls withKeys:(NSArray * __nullable)keys andValues:(NSArray * __nullable)values;
++ (NSMutableArray *__nullable)list:(Class __nullable)cls withKeys:(NSArray * __nullable)keys andValues:(NSArray * __nullable)values;
++ (void)deleteObject:(Class __nullable)cls withKeys:(NSArray * __nullable)keys andValues:(NSArray * __nullable)values;
 
 @end
 
 
 @interface DWHORMDBClassPropertyInfo : NSObject
-@property (nonatomic, assign, readonly) objc_property_t _Nullable property;
-@property (nonatomic, strong, readonly) NSString * _Nullable name;
-@property (nonatomic, strong, readonly) NSString * _Nullable typeEncoding;
+
+@property (nonatomic, assign, readonly, nullable) objc_property_t property;
+@property (nonatomic, strong, readonly, nullable) NSString *name;
+@property (nonatomic, strong, readonly, nullable) NSString *typeEncoding;
 @property (nonatomic, assign, readonly) ORMDBDataType type;
-@property (nullable, nonatomic, assign, readonly) Class cls;
-@property (nullable, nonatomic, strong, readonly) NSString *protocol;
-@property (nonatomic, strong) NSString  * _Nullable foreignTableName;
+@property (nonatomic, assign, readonly, nullable) Class cls;
+@property (nonatomic, strong, readonly, nullable) NSString *protocol;
+@property (nonatomic, strong, nullable) NSString  *foreignTableName;
+
 @end
 
 
 @interface DWHORMDBClassInfo : NSObject
 
-+ (instancetype _Nullable )metaWithClass:(Class _Nullable )cls;
++ (instancetype __nullable)metaWithClass:(Class __nullable)cls;
 
-@property (nonatomic, assign, readonly) Class _Nullable cls;
-@property (nonatomic, strong, readonly) NSString * _Nullable name;
-@property (nullable, nonatomic, strong, readonly) NSMutableArray *propertyInfos;
+@property (nonatomic, assign, readonly, nullable) Class cls;
+@property (nonatomic, strong, readonly, nullable) NSString *name;
+@property (nonatomic, strong, readonly, nullable) NSMutableArray *propertyInfos;
 
 @end
 
-static force_inline NSString* _Nullable SelectColumn(Class _Nullable cls){
+static force_inline NSString * __nullable SelectColumn(Class __nullable cls) {
 	DWHORMDBClassInfo *obj=[DWHORMDBClassInfo metaWithClass:cls];
 	NSMutableString *column=[[NSMutableString alloc] init];
 	for (DWHORMDBClassPropertyInfo *info in obj.propertyInfos) {
-		
 		if (info.type!=ORMDBDataTypeClass&&
 			info.type!=ORMDBDataTypeArray&&
 			info.type!=ORMDBDataTypeMutableArray&&
@@ -202,8 +206,8 @@ static force_inline NSString* _Nullable SelectColumn(Class _Nullable cls){
 	}
 	if (column.length-1>0) {
 		[column deleteCharactersInRange:NSMakeRange([column length]-1, 1)];
-		
 	}
 	return column;
-	
 }
+
+NS_ASSUME_NONNULL_END

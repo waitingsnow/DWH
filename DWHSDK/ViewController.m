@@ -9,8 +9,11 @@
 #import "ViewController.h"
 #import <DWH/DWH.h>
 #import "TestLab.h"
+
 @interface ViewController ()
+
 @property (nonatomic, assign) long long startTime;
+
 @end
 
 @implementation ViewController
@@ -45,6 +48,7 @@
 //
 //    t.transform = CGAffineTransformMakeScale(15, 15);
 }
+
 - (void)testClick3{
     NSLog(@"t2:%f",[[NSProcessInfo processInfo] systemUptime]-self.startTime);
     if ( [[NSDate date] timeIntervalSince1970]>100000000000) {
@@ -56,12 +60,12 @@
     [[DWHSDK dwhSDK] logEvent:@"testEvent" withEventProperties:@{@"ccc":@"dd"}];
 //    [[DWHSDK dwhSDK] setUserId:@"5702364" withProperties:@{@"gender":@"M",@"nation":@"Germany",@"timezone":@2}];
 }
+
 - (void)testClick2{
 //    [[DWHSDK dwhSDK] setServerTime:[[NSDate date] timeIntervalSince1970]*1000];
 }
 
 - (void)testClick{
-    
 //    return;
 //    dispatch_queue_t t =  dispatch_queue_create("hw_queue_event_handle", DISPATCH_QUEUE_CONCURRENT);
 //    dispatch_async(t, ^{
@@ -76,6 +80,5 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-
 
 @end

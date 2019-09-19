@@ -8,8 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface DWHEventId : NSObject
+
 @property (nonatomic, copy) NSString *autoIncrementId;
 @property (nonatomic, assign) long long at;
 @property (nonatomic, assign) long long localTime;
+
 @end
+
+NS_ASSUME_NONNULL_END

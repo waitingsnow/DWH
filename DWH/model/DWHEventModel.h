@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface DWHEventModel : NSObject
 
 @property (nonatomic, copy) NSString *eventName;
@@ -16,12 +18,15 @@
 @property (nonatomic, copy) NSString *device_id;
 @property (nonatomic, copy) NSString *session_id;
 
-@property (nonatomic, copy) NSString *uid;
-@property (nonatomic, copy) NSString *account_create_ts;
+@property (nonatomic, copy, nullable) NSString *uid;
+@property (nonatomic, copy, nullable) NSString *account_create_ts;
 @property (nonatomic, copy) NSString *userProperties;
 @property (nonatomic, assign) int fullTime;
 @property (nonatomic, assign) long long occurTime;
 @property (nonatomic, assign) int autoGrowthID;
 
 @property (nonatomic, assign) long long localTime;
+
 @end
+
+NS_ASSUME_NONNULL_END

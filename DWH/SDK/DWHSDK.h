@@ -39,7 +39,7 @@ typedef enum: NSUInteger {
  birthday 格式 YYYY-MM-dd
  */
 - (void)setUserId:(NSInteger)userId;
-- (void)setUserId:(NSInteger)userId withProperties:(NSDictionary *)userProperties;
+- (void)setUserId:(NSInteger)userId withProperties:(NSDictionary * __nullable)userProperties;
 
 /*
  增量 更新 userProperties

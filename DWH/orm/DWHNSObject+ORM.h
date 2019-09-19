@@ -11,6 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface DWHSqlOperationQueueObject : NSObject
+
 /**
  执行update sql
  **/
@@ -29,9 +30,11 @@ NS_ASSUME_NONNULL_BEGIN
  return false 标识 不存在uid=1的数据
  **/
 - (BOOL)dWHRowExist:(NSString *)sql;
+
 @end
 
 @interface NSObject(Extensions)
+
 /**
  创建表
  **/
@@ -41,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
  保存数据
  @param keyes 数据保存参数条件
  **/
-- (void)dWHSave:(NSArray *)keyes;
+- (void)dWHSave:(NSArray * __nullable)keyes;
 
 /**
  查询单个对象

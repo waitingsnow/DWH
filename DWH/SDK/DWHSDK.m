@@ -311,6 +311,9 @@ static NSString *const BACKGROUND_QUEUE_NAME = @"DWHBACKGROUND";
     event.device_id = [DWHSDK keychain_id];
     
     NSMutableDictionary *userAttribute = [[NSMutableDictionary alloc] init];
+    if (self.userProperties && self.userProperties.count) {
+        [userAttribute addEntriesFromDictionary:self.userProperties];
+    }
     if (userSpecialProperties) {
         [userAttribute addEntriesFromDictionary:userSpecialProperties];
     }

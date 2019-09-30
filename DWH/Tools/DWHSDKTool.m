@@ -88,6 +88,18 @@
     if ([platform hasPrefix:@"iPhone11"]) {
         return @"iPhone X";
     }
+    if ([platform hasPrefix:@"iPhone12,1"]) {
+        return @"iPhone 11";
+    }
+    if ([platform hasPrefix:@"iPhone12,3"]) {
+        return @"iPhone 11 Pro";
+    }
+    if ([platform hasPrefix:@"iPhone12,5"]) {
+        return @"iPhone 11 Pro Max";
+    }
+    if ([platform hasPrefix:@"iPhone12"]) {
+        return @"iPhone 11";
+    }
     if ([platform isEqualToString:@"iPod1,1"])      return @"iPod Touch 1G";
     if ([platform isEqualToString:@"iPod2,1"])      return @"iPod Touch 2G";
     if ([platform isEqualToString:@"iPod3,1"])      return @"iPod Touch 3G";
@@ -127,14 +139,7 @@
     if ([platform isEqualToString:@"iPad6,8"])      return @"iPad Pro 12.9-inch (Cellular)";
     
     if ([platform isEqualToString:@"i386"])         return [UIDevice currentDevice].model;
-    if ([platform isEqualToString:@"x86_64"]) {
-        if ([UIApplication sharedApplication].statusBarFrame.size.height == 44 || [UIScreen mainScreen].bounds.size.height == 812) {
-            return  @"iPhone X";
-        }else {
-            return [UIDevice currentDevice].model;
-        }
-    }
-    
+    if ([platform isEqualToString:@"x86_64"])       return [UIDevice currentDevice].model;
     return platform;
 }
 @end
